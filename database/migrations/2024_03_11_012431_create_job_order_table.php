@@ -12,17 +12,17 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create("set_approvers", function (Blueprint $table) {
+        Schema::create("job_order", function (Blueprint $table) {
             $table->increments("id");
-            $table->unsignedInteger("approver_setting_id")->index();
-            $table
-                ->foreign("approver_setting_id")
-                ->references("id")
-                ->on("approver_settings");
-            $table->string("approver_id");
-            $table->string("approver_name");
-            $table->string("layer");
+            $table->string("module");
+            $table->string("company_id");
+            $table->string("business_unit_id");
+            $table->string("department_id");
+            $table->string("department_unit_id");
+            $table->string("sub_unit_id");
+            $table->string("location_id");
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -33,6 +33,6 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists("set_approvers");
+        Schema::dropIfExists("job_order");
     }
 };

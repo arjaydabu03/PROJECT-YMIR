@@ -12,13 +12,13 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create("set_approvers", function (Blueprint $table) {
+        Schema::create("job_order_approvers", function (Blueprint $table) {
             $table->increments("id");
-            $table->unsignedInteger("approver_setting_id")->index();
+            $table->unsignedInteger("job_order_id")->index();
             $table
-                ->foreign("approver_setting_id")
+                ->foreign("job_order_id")
                 ->references("id")
-                ->on("approver_settings");
+                ->on("job_order");
             $table->string("approver_id");
             $table->string("approver_name");
             $table->string("layer");
@@ -33,6 +33,6 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists("set_approvers");
+        Schema::dropIfExists("job_order_approvers");
     }
 };

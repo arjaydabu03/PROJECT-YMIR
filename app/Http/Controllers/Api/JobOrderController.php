@@ -2,23 +2,21 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\JobOrder;
 use App\Response\Message;
-use App\Models\SetApprover;
 use Illuminate\Http\Request;
-use App\Models\ApproverSettings;
 use App\Functions\GlobalFunction;
+use App\Models\JobOrderApprovers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DisplayRequest;
-use App\Http\Requests\ApproverSettings\StoreRequest;
+use App\Http\Requests\JobOrder\StoreRequest;
 
-class ApproverSettingsController extends Controller
+class JobOrderController extends Controller
 {
     public function index(DisplayRequest $request)
     {
         $status = $request->status;
-        $approver = ApproverSettings::when($status === "inactive", function (
-            $query
-        ) {
+        $job_order = JobOrder::when($status === "inactive", function ($query) {
             $query->onlyTrashed();
         })
             ->with(
@@ -34,7 +32,7 @@ class ApproverSettingsController extends Controller
             ->latest("updated_at")
             ->dynamicPaginate();
 
-        $is_empty = $approver->isEmpty();
+        $is_empty = $job_order->isEmpty();
 
         if ($is_empty) {
             return GlobalFunction::notFound(Message::NOT_FOUND);
@@ -42,13 +40,13 @@ class ApproverSettingsController extends Controller
 
         return GlobalFunction::responseFunction(
             Message::APPROVERS_DISPLAY,
-            $approver
+            $job_order
         );
     }
 
     public function store(StoreRequest $request)
     {
-        $approver = new ApproverSettings([
+        $job_order = new JobOrder([
             "module" => $request["module"],
             "company_id" => $request["company_id"],
             "business_unit_id" => $request["business_unit_id"],
@@ -58,24 +56,24 @@ class ApproverSettingsController extends Controller
             "location_id" => $request["location_id"],
         ]);
 
-        $approver->save();
+        $job_order->save();
 
         $set_approver = $request["settings_approver"];
 
         foreach ($set_approver as $key => $value) {
-            SetApprover::create([
-                "approver_settings_id" => $approver->id,
+            JobOrderApprovers::create([
+                "job_order_id" => $job_order->id,
                 "approver_id" => $set_approver[$key]["approver_id"],
                 "approver_name" => $set_approver[$key]["approver_name"],
                 "layer" => $set_approver[$key]["layer"],
             ]);
         }
 
-        return GlobalFunction::save(Message::APPROVERS_SAVE, $approver);
+        return GlobalFunction::save(Message::APPROVERS_SAVE, $job_order);
     }
     public function update(StoreRequest $request, $id)
     {
-        $setting = ApproverSettings::find($id);
+        $setting = JobOrder::find($id);
 
         $set_approver = $request["settings_approver"];
 
@@ -83,26 +81,28 @@ class ApproverSettingsController extends Controller
         $newTaggedApproval = collect($set_approver)
             ->pluck("id")
             ->toArray();
-        $currentTaggedApproval = SetApprover::where("approver_settings_id", $id)
+        $currentTaggedApproval = JobOrderApprovers::where("job_order_id", $id)
             ->get()
             ->pluck("id")
             ->toArray();
 
         foreach ($currentTaggedApproval as $set_approver_id) {
             if (!in_array($set_approver_id, $newTaggedApproval)) {
-                SetApprover::where("id", $set_approver_id)->forceDelete();
+                JobOrderApprovers::where("id", $set_approver_id)->forceDelete();
             }
         }
 
         foreach ($set_approver as $index => $value) {
-            SetApprover::updateOrCreate(
+            JobOrderApprovers::updateOrCreate(
                 [
                     "id" => $value["id"] ?? null,
-                    "approver_settings_id" => $id,
+                    "job_order_id" => $id,
+                ],
+                [
                     "approver_id" => $value["approver_id"],
                     "approver_name" => $value["approver_name"],
-                ],
-                ["layer" => $value["layer"]]
+                    "layer" => $value["layer"],
+                ]
             );
         }
 
@@ -123,27 +123,27 @@ class ApproverSettingsController extends Controller
 
     public function destroy($id)
     {
-        $approver = ApproverSettings::where("id", $id)
+        $job_order = JobOrder::where("id", $id)
             ->withTrashed()
             ->get();
 
-        if ($approver->isEmpty()) {
+        if ($job_order->isEmpty()) {
             return GlobalFunction::notFound(Message::NOT_FOUND);
         }
 
-        $approver = ApproverSettings::withTrashed()->find($id);
-        $is_active = ApproverSettings::withTrashed()
+        $job_order = JobOrder::withTrashed()->find($id);
+        $is_active = JobOrder::withTrashed()
             ->where("id", $id)
             ->first();
         if (!$is_active) {
             return $is_active;
         } elseif (!$is_active->deleted_at) {
-            $approver->delete();
+            $job_order->delete();
             $message = Message::ARCHIVE_STATUS;
         } else {
-            $approver->restore();
+            $job_order->restore();
             $message = Message::RESTORE_STATUS;
         }
-        return GlobalFunction::responseFunction($message, $approver);
+        return GlobalFunction::responseFunction($message, $job_order);
     }
 }

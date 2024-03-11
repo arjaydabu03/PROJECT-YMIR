@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Company;
 use App\Response\Message;
+use App\Models\BusinessUnit;
 use Illuminate\Http\Request;
 use App\Functions\GlobalFunction;
 use App\Http\Controllers\Controller;
@@ -75,6 +76,16 @@ class CompanyController extends Controller
         $company = Company::where("id", $id)
             ->withTrashed()
             ->get();
+
+        $business_unit = BusinessUnit::with("company")
+            ->whereHas("company", function ($query) use ($id) {
+                return $query->where("id", $id);
+            })
+            ->exists();
+
+        if ($business_unit) {
+            return GlobalFunction::invalid(Message::IN_USE);
+        }
 
         if ($company->isEmpty()) {
             return GlobalFunction::notFound(Message::NOT_FOUND);

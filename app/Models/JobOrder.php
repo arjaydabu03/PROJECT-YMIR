@@ -2,18 +2,19 @@
 
 namespace App\Models;
 
-use App\Filters\ApproverFilters;
+use App\Filters\JobOrderFilters;
 use Essa\APIToolKit\Filters\Filterable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class ApproverSettings extends Model
+class JobOrder extends Model
 {
     use Filterable, HasFactory, SoftDeletes;
 
-    protected string $default_filters = ApproverFilters::class;
+    protected string $default_filters = JobOrderFilters::class;
 
+    protected $table = "job_order";
     protected $fillable = [
         "module",
         "company_id",
@@ -55,6 +56,6 @@ class ApproverSettings extends Model
 
     public function set_approver()
     {
-        return $this->hasMany(SetApprover::class, "approver_settings_id", "id");
+        return $this->hasMany(JobOrderApprovers::class, "job_order_id", "id");
     }
 }

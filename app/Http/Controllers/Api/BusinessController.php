@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Response\Message;
+use App\Models\Department;
 use App\Models\BusinessUnit;
 use Illuminate\Http\Request;
 use App\Functions\GlobalFunction;
@@ -80,6 +81,16 @@ class BusinessController extends Controller
 
         if ($business_unit->isEmpty()) {
             return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+
+        $department = Department::with("department")
+            ->whereHas("department", function ($query) use ($id) {
+                return $query->where("id", $id);
+            })
+            ->exists();
+
+        if ($department) {
+            return GlobalFunction::invalid(Message::IN_USE_BUSINESS_UNIT);
         }
 
         $business_unit = BusinessUnit::withTrashed()->find($id);

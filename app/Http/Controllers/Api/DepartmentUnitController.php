@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\SubUnit;
 use App\Response\Message;
 use Illuminate\Http\Request;
 use App\Models\DepartmentUnit;
@@ -83,6 +84,15 @@ class DepartmentUnitController extends Controller
 
         if ($department_unit->isEmpty()) {
             return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+        $sub_unit = SubUnit::with("sub_unit")
+            ->whereHas("sub_unit", function ($query) use ($id) {
+                return $query->where("id", $id);
+            })
+            ->exists();
+
+        if ($sub_unit) {
+            return GlobalFunction::invalid(Message::IN_USE_DEPARTMENT);
         }
 
         $department_unit = DepartmentUnit::withTrashed()->find($id);

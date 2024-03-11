@@ -10,12 +10,12 @@ class CompanyFilters extends QueryFilters
 
     protected array $columnSearch = [];
 
-    // public function business_unit_id($company_id)
-    // {
-    //     $this->builder->whereHas("business_unit", function ($query) use (
-    //         $business_unit_id
-    //     ) {
-    //         $query->where("company_id", $business_unit_id);
-    //     });
-    // }
+    public function vladimir($vladimir)
+    {
+        $this->builder->when($vladimir == "sync", function ($query) use (
+            $vladimir
+        ) {
+            $query->withTrashed();
+        });
+    }
 }

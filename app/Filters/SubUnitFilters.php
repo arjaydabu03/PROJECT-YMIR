@@ -14,4 +14,12 @@ class SubUnitFilters extends QueryFilters
     {
         $this->builder->where("department_unit_id", $department_unit_id);
     }
+    public function vladimir($vladimir)
+    {
+        $this->builder->when($vladimir == "sync", function ($query) use (
+            $vladimir
+        ) {
+            $query->withTrashed();
+        });
+    }
 }

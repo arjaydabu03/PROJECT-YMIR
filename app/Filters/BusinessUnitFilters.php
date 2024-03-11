@@ -14,4 +14,13 @@ class BusinessUnitFilters extends QueryFilters
     {
         $this->builder->where("company_id", $company_id);
     }
+
+    public function vladimir($vladimir)
+    {
+        $this->builder->when($vladimir == "sync", function ($query) use (
+            $vladimir
+        ) {
+            $query->withTrashed();
+        });
+    }
 }

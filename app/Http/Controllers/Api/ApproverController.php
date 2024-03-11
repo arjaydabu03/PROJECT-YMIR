@@ -35,15 +35,22 @@ class ApproverController extends Controller
             ->get()
             ->first();
 
+        if (empty($approver_settings)) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+
         $set_approver = SetApprover::where(
             "approver_settings_id",
             $approver_settings->id
         )
-            ->where("approver_id", $user_id->id)
+            ->where("approver_id", $user)
+
             ->get()
             ->first();
 
-        $status = $request->status;
+        if (empty($set_approver)) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
         $purchase_request = PRTransaction::with("order")
             ->where("business_unit_id", $user_id->business_unit_id)
             ->where("company_id", $user_id->company_id)

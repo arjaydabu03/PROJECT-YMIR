@@ -27,12 +27,11 @@ class GlobalFunction
             Message::SUCESS_STATUS
         );
     }
-    public static function notFound($message, $result = [])
+    public static function notFound($message)
     {
         return response()->json(
             [
                 "message" => $message,
-                "result" => $result,
             ],
             Message::DATA_NOT_FOUND
         );

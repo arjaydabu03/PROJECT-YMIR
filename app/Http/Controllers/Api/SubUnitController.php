@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\SubUnit;
+use App\Models\Location;
 use App\Response\Message;
 use Illuminate\Http\Request;
 use App\Functions\GlobalFunction;
@@ -80,6 +81,15 @@ class SubUnitController extends Controller
 
         if ($subunit->isEmpty()) {
             return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+        $location = Location::with("locations")
+            ->whereHas("locations", function ($query) use ($id) {
+                return $query->where("id", $id);
+            })
+            ->exists();
+
+        if ($location) {
+            return GlobalFunction::invalid(Message::IN_USE_DEPARTMENT);
         }
 
         $subunit = SubUnit::withTrashed()->find($id);

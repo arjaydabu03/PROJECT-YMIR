@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\SubUnitController;
 use App\Http\Controllers\Api\ApproverController;
 use App\Http\Controllers\Api\BusinessController;
+use App\Http\Controllers\Api\JobOrderController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\FinancialController;
@@ -172,5 +173,12 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::apiResource("approvers_settings", ApproverSettingsController::class);
     Route::patch("approved/{id}", [ApproverController::class, "approved"]);
     Route::apiResource("approver_dashboard", ApproverController::class);
+
+    Route::patch("job_order/archived/{id}", [
+        JobOrderController::class,
+        "destroy",
+    ]);
+
+    Route::apiResource("job_order", JobOrderController::class);
 });
 Route::post("login", [UserController::class, "login"]);

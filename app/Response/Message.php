@@ -102,6 +102,11 @@ class Message
     const NEW_PASSWORD = "Please change your password.";
     const EXISTS = "Data already exists.";
     const ACCESS_DENIED = "You do not have permission.";
+    const IN_USE_COMPANY = "This company is in used.";
+    const IN_USE_DEPARTMENT = "This department is in used.";
+    const IN_USE_DEPARTMENT_UNIT = "This department unit is in used.";
+    const IN_USE_SUB_UNIT = "This sub unit is in used.";
+    const IN_USE_BUSINESS_UNIT = "This business unit is in used.";
 
     //PR RESPONSE
     const CANCELLED = "Purchase request has been cancelled.";

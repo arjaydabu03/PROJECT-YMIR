@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SetApprover extends Model
+class JobOrderApprovers extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        "approver_settings_id",
+        "job_order_id",
         "approver_id",
         "approver_name",
         "layer",

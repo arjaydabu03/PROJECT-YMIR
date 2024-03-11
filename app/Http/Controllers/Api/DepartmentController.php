@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Response\Message;
 use App\Models\Department;
 use Illuminate\Http\Request;
+use App\Models\DepartmentUnit;
 use App\Functions\GlobalFunction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DisplayRequest;
@@ -18,7 +19,7 @@ class DepartmentController extends Controller
     {
         $status = $request->status;
 
-        $department = Department::with("department_unit","business_unit")
+        $department = Department::with("department_unit", "business_unit")
             ->when($status === "inactive", function ($query) {
                 $query->onlyTrashed();
             })
@@ -81,6 +82,15 @@ class DepartmentController extends Controller
 
         if ($department->isEmpty()) {
             return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+        $department_unit = DepartmentUnit::with("department_unit")
+            ->whereHas("department_unit", function ($query) use ($id) {
+                return $query->where("id", $id);
+            })
+            ->exists();
+
+        if ($department_unit) {
+            return GlobalFunction::invalid(Message::IN_USE_DEPARTMENT);
         }
 
         $department = Department::withTrashed()->find($id);
