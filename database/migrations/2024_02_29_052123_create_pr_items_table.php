@@ -32,7 +32,8 @@ return new class extends Migration {
 
             $table->double("quantity");
             $table->string("remarks");
-            $table->timestamp("canvas")->nullable();
+            $table->timestamp("canvas_po")->nullable();
+            $table->timestamp("canvas_at")->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

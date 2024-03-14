@@ -30,6 +30,7 @@ class StoreRequest extends FormRequest
                         $this->route()->pr_transaction
                     : "unique:pr_transactions,pr_number",
             ],
+            "supplier_id" => "exists:suppliers,id,deleted_at,NULL",
         ];
     }
 }

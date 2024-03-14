@@ -33,7 +33,7 @@ class Message
     const DEPARTMENT_UNIT_SAVE = "Department unit successfully save.";
     const ACCOUNT_TITLE_SAVE = "Account title successfully save.";
     const PURCHASE_REQUEST_SAVE = "Purchase request successfully save.";
-    const APPROVERS_SAVE = "Approver settings successfully save.";
+    const APPROVERS_SAVE = "Approvers successfully save.";
 
     // DISPLAY DATA
     const USER_DISPLAY = "User display successfully.";
@@ -58,7 +58,7 @@ class Message
     const DEPARTMENT_UNIT_DISPLAY = "Department unit  display successfully.";
     const ACCOUNT_TITLE_DISPLAY = "Account title  display successfully.";
     const PURCHASE_REQUEST_DISPLAY = "Purchase request  display successfully.";
-    const APPROVERS_DISPLAY = "Approver settings  display successfully.";
+    const APPROVERS_DISPLAY = "Approvers display successfully.";
 
     //UPDATE
     const USER_UPDATE = "User successfully updated.";
@@ -83,7 +83,7 @@ class Message
     const DEPARTMENT_UNIT_UPDATE = "Department unit  successfully updated.";
     const ACCOUNT_TITLE_UPDATE = "Account title successfully updated.";
     const PURCHASE_REQUEST_UPDATE = "Purchase request successfully updated.";
-    const APPROVERS_UPDATE = "Approver settings successfully updated.";
+    const APPROVERS_UPDATE = "Approvers successfully updated.";
 
     //SOFT DELETE
     const ARCHIVE_STATUS = "Successfully archived.";

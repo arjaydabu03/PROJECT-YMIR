@@ -26,4 +26,14 @@ class Location extends Model
             "sub_unit_id"
         )->withTimeStamps();
     }
+
+    // public function sub_unit_id()
+    // {
+    //     return $this->belongsToMany(
+    //         Location::class,
+    //         "location_sub_units",
+    //         "location_id",
+    //         "sub_unit_id"
+    //     )->withTimeStamps();
+    // }
 }

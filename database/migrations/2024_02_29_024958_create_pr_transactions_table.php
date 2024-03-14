@@ -80,6 +80,13 @@ return new class extends Migration {
                 ->on("account_titles");
             $table->string("account_title_name");
 
+            $table->unsignedInteger("supplier_id")->index();
+            $table
+                ->foreign("supplier_id")
+                ->references("id")
+                ->on("suppliers");
+            $table->string("supplier_name");
+
             $table->string("module_name");
             $table->string("layer");
             $table->string("reason")->nullable();

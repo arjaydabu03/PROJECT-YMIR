@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Api;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\PRItems;
+use App\Models\PrHistory;
 use App\Response\Message;
+use App\Models\SetApprover;
 use Illuminate\Http\Request;
 use App\Models\PRTransaction;
+use App\Models\ApproverSettings;
 use App\Functions\GlobalFunction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PRViewRequest;
@@ -82,6 +85,8 @@ class PRTransactionController extends Controller
             "sub_unit_name" => $user_details->sub_unit->name,
             "account_title_id" => $request->account_title_id,
             "account_title_name" => $request->account_title_name,
+            "supplier_id" => $request->supplier_id,
+            "supplier_name" => $request->supplier_name,
             "module_name" => $request->module_name,
             "layer" => "1",
         ]);
@@ -97,6 +102,32 @@ class PRTransactionController extends Controller
                 "quantity" => $request["order"][$index]["quantity"],
                 "canvas" => $request["order"][$index]["canvas"],
                 "remarks" => $request["order"][$index]["remarks"],
+            ]);
+        }
+        $approver_settings = ApproverSettings::where(
+            "company_id",
+            $purchase_request->company_id
+        )
+            ->where("business_unit_id", $purchase_request->business_unit_id)
+            ->where("department_id", $purchase_request->department_id)
+            ->where("department_unit_id", $purchase_request->department_unit_id)
+            ->where("sub_unit_id", $purchase_request->sub_unit_id)
+            ->where("location_id", $purchase_request->location_id)
+            ->whereHas("set_approver")
+            ->get()
+            ->first();
+
+        $approvers = SetApprover::where(
+            "approver_settings_id",
+            $approver_settings->id
+        )->get();
+
+        foreach ($approvers as $index) {
+            PrHistory::create([
+                "pr_id" => $purchase_request->id,
+                "approver_id" => $index["approver_id"],
+                "approver_name" => $index["approver_name"],
+                "layer" => $index["layer"],
             ]);
         }
 
@@ -153,6 +184,8 @@ class PRTransactionController extends Controller
             "sub_unit_name" => $user_details->sub_unit->name,
             "account_title_id" => $request->account_title_id,
             "account_title_name" => $request->account_title_name,
+            "supplier_id" => $request->supplier_id,
+            "supplier_name" => $request->supplier_name,
             "module_name" => $request->module_name,
         ]);
 

@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\FinancialController;
 use App\Http\Controllers\Api\WarehouseController;
 use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\AccountTypeController;
+use App\Http\Controllers\Api\PoApproversController;
 use App\Http\Controllers\Api\AccountGroupController;
 use App\Http\Controllers\Api\AccountTitleController;
 use App\Http\Controllers\Api\NormalBalanceController;
@@ -180,5 +181,12 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     ]);
 
     Route::apiResource("job_order", JobOrderController::class);
+
+    Route::patch("po_approver/archived/{id}", [
+        PoApproversController::class,
+        "destroy",
+    ]);
+
+    Route::apiResource("po_approver", PoApproversController::class);
 });
 Route::post("login", [UserController::class, "login"]);
