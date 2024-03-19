@@ -40,6 +40,13 @@ class LoginResource extends JsonResource
                 "name" => $this->department->name,
                 "code" => $this->department->code,
             ],
+            "department_units" => [
+                "id" => $this->department_unit->id,
+                "name" => $this->department_unit->name,
+                "code" => $this->department_unit->code,
+                "updated_at" => $this->department_unit->updated_at,
+                "deleted_at" => $this->department_unit->deleted_at,
+            ],
             "sub_unit" => [
                 "id" => $this->sub_unit->id,
                 "name" => $this->sub_unit->name,
@@ -58,9 +65,7 @@ class LoginResource extends JsonResource
             "username" => $this->username,
             "updated_at" => $this->updated_at,
             "token" => $this->token,
-            "role" => (new RoleResource($this->role)),
-
+            "role" => new RoleResource($this->role),
         ];
-
     }
 }

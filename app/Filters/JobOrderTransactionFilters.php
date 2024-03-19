@@ -4,9 +4,9 @@ namespace App\Filters;
 
 use Essa\APIToolKit\Filters\QueryFilters;
 
-class AccountTypeFilters extends QueryFilters
+class JobOrderTransactionFilters extends QueryFilters
 {
     protected array $allowedFilters = [];
 
-    protected array $columnSearch = ["name"];
+    protected array $columnSearch = [];
 }

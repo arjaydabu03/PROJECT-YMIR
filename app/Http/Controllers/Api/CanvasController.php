@@ -3,24 +3,23 @@
 namespace App\Http\Controllers\Api;
 
 use App\Response\Message;
-use App\Models\PoApprovers;
 use Illuminate\Http\Request;
+use App\Models\CanvasApprover;
 use App\Functions\GlobalFunction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DisplayRequest;
-use App\Http\Requests\PO\StoreRequest;
+use App\Http\Requests\Canvas\StoreRequest;
 
-class PoApproversController extends Controller
+class CanvasController extends Controller
 {
     public function index(DisplayRequest $request)
     {
         $status = $request->status;
-        $job_order = PoApprovers::when($status === "inactive", function (
+        $job_order = CanvasApprover::when($status === "inactive", function (
             $query
         ) {
             $query->onlyTrashed();
         })
-
             ->useFilters()
             ->latest("updated_at")
             ->dynamicPaginate();
@@ -50,28 +49,34 @@ class PoApproversController extends Controller
             ->pluck("approver_id")
             ->toArray();
 
-        $approver_id = PoApprovers::whereIn("approver_id", $newTaggedApproval)
+        $approver_id = CanvasApprover::whereIn(
+            "approver_id",
+            $newTaggedApproval
+        )
             ->get()
             ->pluck("id")
             ->toArray();
 
-        $currentTaggedApproval = PoApprovers::get()
+        $currentTaggedApproval = CanvasApprover::get()
             ->pluck("id")
             ->toArray();
 
         foreach ($currentTaggedApproval as $set_approver_id) {
             if (!in_array($set_approver_id, $approver_id)) {
-                PoApprovers::where("id", $set_approver_id)->delete();
+                CanvasApprover::where("id", $set_approver_id)->delete();
             }
         }
 
         foreach ($group as $index => $value) {
-            PoApprovers::updateOrCreate(
+            CanvasApprover::updateOrCreate(
                 [
                     "approver_id" => $value["approver_id"],
                     "approver_name" => $value["approver_name"],
                 ],
-                ["layer" => $value["layer"]]
+                [
+                    "from_price" => $value["from_price"],
+                    "to_price" => $value["to_price"],
+                ]
             );
         }
         return GlobalFunction::save(

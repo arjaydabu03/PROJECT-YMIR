@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\PurchaseRequest;
+namespace App\Http\Requests\JobOrderTransaction;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -24,13 +24,12 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
-            "pr_number" => [
-                $this->route()->pr_transaction
-                    ? "unique:pr_transactions,pr_number," .
-                        $this->route()->pr_transaction
-                    : "unique:pr_transactions,pr_number",
+            "jo_number" => [
+                $this->route()->job_order_transaction
+                    ? "unique:jo_transactions,jo_number," .
+                        $this->route()->job_order_transaction
+                    : "unique:jo_transactions,jo_number",
             ],
-            // "supplier_id" => "exists:suppliers,id,deleted_at,NULL",
         ];
     }
 }

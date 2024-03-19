@@ -8,7 +8,7 @@ class BusinessUnitFilters extends QueryFilters
 {
     protected array $allowedFilters = [];
 
-    protected array $columnSearch = [];
+    protected array $columnSearch = ["name", "code"];
 
     public function company_id($company_id)
     {

@@ -8,7 +8,7 @@ class DepartmentUnitFilters extends QueryFilters
 {
     protected array $allowedFilters = [];
 
-    protected array $columnSearch = [];
+    protected array $columnSearch = ["name", "code"];
 
     public function department_id($department_id)
     {

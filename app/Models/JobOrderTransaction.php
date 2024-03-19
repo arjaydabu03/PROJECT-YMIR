@@ -2,23 +2,22 @@
 
 namespace App\Models;
 
-use App\Filters\PRTransactionFilters;
 use Essa\APIToolKit\Filters\Filterable;
 use Illuminate\Database\Eloquent\Model;
+use App\Filters\JobOrderTransactionFilters;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class PRTransaction extends Model
+class JobOrderTransaction extends Model
 {
-    use Filterable, HasFactory, SoftDeletes;
+    use Filterable, SoftDeletes, HasFactory;
 
-    protected $table = "pr_transactions";
+    protected string $default_filters = JobOrderTransactionFilters::class;
 
-    protected string $default_filters = PRTransactionFilters::class;
-
+    protected $table = "jo_transactions";
     protected $fillable = [
-        "pr_number",
-        "pr_description",
+        "jo_number",
+        "jo_description",
         "date_needed",
         "user_id",
         "type_id",
@@ -48,7 +47,6 @@ class PRTransaction extends Model
         "rejected_at",
         "voided_at",
         "cancelled_at",
-
         "approver_id",
     ];
 
@@ -59,11 +57,11 @@ class PRTransaction extends Model
 
     public function order()
     {
-        return $this->hasMany(PRItems::class, "transaction_id", "id");
+        return $this->hasMany(JobItems::class, "jo_transaction_id", "id");
     }
 
     public function approver_history()
     {
-        return $this->hasMany(PrHistory::class, "pr_id", "id");
+        return $this->hasMany(JobHistory::class, "jo_id", "id");
     }
 }

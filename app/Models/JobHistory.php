@@ -5,13 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PrHistory extends Model
+class JobHistory extends Model
 {
     use HasFactory;
-
-    protected $table = "pr_approvers_history";
+    protected $table = "jo_history";
     protected $fillable = [
-        "pr_id",
+        "jo_id",
         "approver_id",
         "approver_name",
         "approved_at",

@@ -2,11 +2,11 @@
 
 namespace App\Http\Resources;
 
-use App\Http\Resources\PRItemsResource;
-use App\Http\Resources\ApporverHistoryResource;
+use App\Http\Resources\JobOrderItemsResource;
+use App\Http\Resources\JobOrderHistoryResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PRTransactionResource extends JsonResource
+class JobOrderResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,8 +18,8 @@ class PRTransactionResource extends JsonResource
     {
         return [
             "id" => $this->id,
-            "pr_number" => $this->pr_number,
-            "pr_description" => $this->pr_description,
+            "jo_number" => $this->jo_number,
+            "jo_description" => $this->jo_description,
             "date_needed" => $this->date_needed,
             "po_number" => $this->po_number,
 
@@ -71,8 +71,10 @@ class PRTransactionResource extends JsonResource
             "description" => $this->description,
             "reason" => $this->reason,
             "created_at" => $this->created_at,
-            "transactionItem" => PRItemsResource::collection($this->order),
-            "approver_history" => ApporverHistoryResource::collection(
+            "transactionItem" => JobOrderItemsResource::collection(
+                $this->order
+            ),
+            "approver_history" => JobOrderHistoryResource::collection(
                 $this->approver_history
             ),
         ];

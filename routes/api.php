@@ -7,7 +7,9 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\TypeController;
 use App\Http\Controllers\Api\UnitController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\CanvasController;
 use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\SubUnitController;
 use App\Http\Controllers\Api\ApproverController;
 use App\Http\Controllers\Api\BusinessController;
@@ -27,6 +29,7 @@ use App\Http\Controllers\Api\DepartmentUnitController;
 use App\Http\Controllers\Api\AccountSubGroupController;
 use App\Http\Controllers\Api\AccountTitleUnitController;
 use App\Http\Controllers\Api\ApproverSettingsController;
+use App\Http\Controllers\Api\JobOrderTransactionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -158,12 +161,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
         PRTransactionController::class,
         "destroy",
     ]);
-    Route::patch("cancelled/{id}", [
-        PRTransactionController::class,
-        "cancelled",
-    ]);
-    Route::patch("voided/{id}", [PRTransactionController::class, "voided"]);
-    Route::patch("rejected/{id}", [PRTransactionController::class, "rejected"]);
+
     Route::apiResource("pr_transaction", PRTransactionController::class);
 
     Route::patch("approvers_settings/archived/{id}", [
@@ -172,8 +170,13 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     ]);
 
     Route::apiResource("approvers_settings", ApproverSettingsController::class);
+
     Route::patch("approved/{id}", [ApproverController::class, "approved"]);
+    Route::get("job_approver", [ApproverController::class, "job_order"]);
     Route::apiResource("approver_dashboard", ApproverController::class);
+    Route::patch("cancelled/{id}", [ApproverController::class, "cancelled"]);
+    Route::patch("void/{id}", [ApproverController::class, "voided"]);
+    Route::patch("rejected/{id}", [ApproverController::class, "rejected"]);
 
     Route::patch("job_order/archived/{id}", [
         JobOrderController::class,
@@ -188,5 +191,19 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     ]);
 
     Route::apiResource("po_approver", PoApproversController::class);
+
+    Route::apiResource("canvas_approver", CanvasController::class);
+
+    Route::patch("expense/archived/{id}", [
+        ExpenseController::class,
+        "destroy",
+    ]);
+
+    Route::apiResource("expense", ExpenseController::class);
+
+    Route::apiResource(
+        "job_order_transaction",
+        JobOrderTransactionController::class
+    );
 });
 Route::post("login", [UserController::class, "login"]);

@@ -12,18 +12,14 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create("pr_items", function (Blueprint $table) {
+        Schema::create("jo_items", function (Blueprint $table) {
             $table->increments("id");
-            $table->unsignedInteger("transaction_id")->index();
+            $table->unsignedInteger("jo_transaction_id")->index();
             $table
-                ->foreign("transaction_id")
+                ->foreign("jo_transaction_id")
                 ->references("id")
-                ->on("pr_transactions");
-
-            $table->string("item_id");
-            $table->string("item_code");
-            $table->string("item_name");
-
+                ->on("jo_transactions");
+            $table->string("description");
             $table->unsignedInteger("uom_id")->index();
             $table
                 ->foreign("uom_id")
@@ -32,8 +28,6 @@ return new class extends Migration {
 
             $table->double("quantity");
             $table->string("remarks")->nullable();
-            $table->timestamp("canvas_po")->nullable();
-            $table->timestamp("canvas_at")->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -46,6 +40,6 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists("pr_items");
+        Schema::dropIfExists("jo_items");
     }
 };

@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use Carbon\Carbon;
-use App\Models\User;
 use App\Models\PRItems;
 use App\Models\PrHistory;
 use App\Response\Message;
@@ -14,19 +12,19 @@ use App\Models\ApproverSettings;
 use App\Functions\GlobalFunction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PRViewRequest;
+use App\Http\Requests\Expense\StoreRequest;
 use App\Http\Resources\PRTransactionResource;
-use App\Http\Requests\PurchaseRequest\StoreRequest;
 
-class PRTransactionController extends Controller
+class ExpenseController extends Controller
 {
     public function index(PRViewRequest $request)
     {
         $user_id = Auth()->user()->id;
         $status = $request->status;
         $purchase_request = PRTransaction::with("approver_history")
-
-            ->orderByDesc("updated_at")
+            ->where("user_id", $user_id)
             ->useFilters()
+            ->orderByDesc("updated_at")
             ->dynamicPaginate();
 
         $is_empty = $purchase_request->isEmpty();
@@ -53,18 +51,6 @@ class PRTransactionController extends Controller
             ->first();
         $increment = $pr_number ? $pr_number->id + 1 : 1;
 
-        $user_details = User::with(
-            "company",
-            "business_unit",
-            "department",
-            "department_unit",
-            "sub_unit",
-            "location"
-        )
-            ->where("id", $user_id)
-            ->get()
-            ->first();
-
         $purchase_request = new PRTransaction([
             "pr_number" => $increment,
             "pr_description" => $request["pr_description"],
@@ -72,26 +58,25 @@ class PRTransactionController extends Controller
             "user_id" => $user_id,
             "type_id" => $request["type_id"],
             "type_name" => $request["type_name"],
-            "business_unit_id" => $user_details->business_unit->id,
-            "business_unit_name" => $user_details->business_unit->name,
-            "company_id" => $user_details->company->id,
-            "company_name" => $user_details->company->name,
-            "department_id" => $user_details->department->id,
-            "department_name" => $user_details->department->name,
-            "department_unit_id" => $user_details->department_unit->id,
-            "department_unit_name" => $user_details->department_unit->name,
-            "location_id" => $user_details->location->id,
-            "location_name" => $user_details->location->name,
-            "sub_unit_id" => $user_details->sub_unit->id,
-            "sub_unit_name" => $user_details->sub_unit->name,
-            "account_title_id" => $request->account_title_id,
-            "account_title_name" => $request->account_title_name,
-            "supplier_id" => $request->supplier_id,
-            "supplier_name" => $request->supplier_name,
+            "business_unit_id" => $request["business_unit_id"],
+            "business_unit_name" => $request["business_unit_name"],
+            "company_id" => $request["company_id"],
+            "company_name" => $request["company_name"],
+            "department_id" => $request["department_id"],
+            "department_name" => $request["department_name"],
+            "department_unit_id" => $request["department_unit_id"],
+            "department_unit_name" => $request["department_unit_name"],
+            "location_id" => $request["location_id"],
+            "location_name" => $request["location_name"],
+            "sub_unit_id" => $request["sub_unit_id"],
+            "sub_unit_name" => $request["sub_unit_name"],
+            "account_title_id" => $request["account_title_id"],
+            "account_title_name" => $request["account_title_name"],
+            "supplier_id" => $request["supplier_id"],
+            "supplier_name" => $request["supplier_name"],
             "module_name" => "Inventoriables",
-            "status" => "For approval",
+            "description" => $request["description"],
             "layer" => "1",
-            "description" => $request->description,
         ]);
         $purchase_request->save();
 
@@ -103,6 +88,7 @@ class PRTransactionController extends Controller
                 "item_name" => $request["order"][$index]["item_name"],
                 "uom_id" => $request["order"][$index]["uom_id"],
                 "quantity" => $request["order"][$index]["quantity"],
+                "canvas" => $request["order"][$index]["canvas"],
                 "remarks" => $request["order"][$index]["remarks"],
             ]);
         }
@@ -153,43 +139,31 @@ class PRTransactionController extends Controller
 
         $orders = $request->order;
 
-        $user_details = User::with(
-            "company",
-            "business_unit",
-            "department",
-            "department_unit",
-            "sub_unit",
-            "location"
-        )
-            ->where("id", $user_id)
-            ->get()
-            ->first();
-
         $purchase_request->update([
-            "pr_number" => $purchase_request->id,
+            "pr_number" => "1",
             "pr_description" => $request["pr_description"],
             "date_needed" => $request["date_needed"],
             "user_id" => $user_id,
             "type_id" => $request["type_id"],
             "type_name" => $request["type_name"],
-            "business_unit_id" => $user_details->business_unit->id,
-            "business_unit_name" => $user_details->business_unit->name,
-            "company_id" => $user_details->company->id,
-            "company_name" => $user_details->company->name,
-            "department_id" => $user_details->department->id,
-            "department_name" => $user_details->department->name,
-            "department_unit_id" => $user_details->department_unit->id,
-            "department_unit_name" => $user_details->department_unit->name,
-            "location_id" => $user_details->location->id,
-            "location_name" => $user_details->location->name,
-            "sub_unit_id" => $user_details->sub_unit->id,
-            "sub_unit_name" => $user_details->sub_unit->name,
-            "account_title_id" => $request->account_title_id,
-            "account_title_name" => $request->account_title_name,
-            "supplier_id" => $request->supplier_id,
-            "supplier_name" => $request->supplier_name,
-            "module_name" => $request->module_name,
-            "description" => $request->description,
+            "business_unit_id" => $request["business_unit_id"],
+            "business_unit_name" => $request["business_unit_name"],
+            "company_id" => $request["company_id"],
+            "company_name" => $request["company_name"],
+            "department_id" => $request["department_id"],
+            "department_name" => $request["department_name"],
+            "department_unit_id" => $request["department_unit_id"],
+            "department_unit_name" => $request["department_unit_name"],
+            "location_id" => $request["location_id"],
+            "location_name" => $request["location_name"],
+            "sub_unit_id" => $request["sub_unit_id"],
+            "sub_unit_name" => $request["sub_unit_name"],
+            "account_title_id" => $request["account_title_id"],
+            "account_title_name" => $request["account_title_name"],
+            "supplier_id" => $request["supplier_id"],
+            "supplier_name" => $request["supplier_name"],
+            "module_name" => $request["module_name"],
+            "description" => $request["description"],
         ]);
 
         $newOrders = collect($orders)
@@ -218,6 +192,7 @@ class PRTransactionController extends Controller
                     "item_name" => $values["item_name"],
                     "uom_id" => $values["uom_id"],
                     "quantity" => $values["quantity"],
+                    "canvas" => $values["canvas"],
                     "remarks" => $values["remarks"],
                 ]
             );
@@ -256,4 +231,57 @@ class PRTransactionController extends Controller
         }
         return GlobalFunction::responseFunction($message, $purchase_request);
     }
+    public function cancelled(Request $request, $id)
+    {
+        $date_today = Carbon::now()
+            ->timeZone("Asia/Manila")
+            ->format("Y-m-d H:i");
+
+        $pr_transaction = PRTransaction::find($id);
+
+        $pr_transaction->update([
+            "cancelled_at" => $date_today,
+            "reason" => $request->reason,
+        ]);
+        $pr_collect = new PRTransactionResource($pr_transaction);
+
+        return GlobalFunction::responseFunction(
+            Message::CANCELLED,
+            $pr_collect
+        );
+    }
+    public function voided(Request $request, $id)
+    {
+        $date_today = Carbon::now()
+            ->timeZone("Asia/Manila")
+            ->format("Y-m-d H:i");
+
+        $pr_transaction = PRTransaction::find($id);
+
+        $pr_transaction->update([
+            "voided_at" => $date_today,
+            "reason" => $request->reason,
+        ]);
+
+        $pr_collect = new PRTransactionResource($pr_transaction);
+        return GlobalFunction::responseFunction(Message::VOIDED, $pr_collect);
+    }
+    public function rejected(Request $request, $id)
+    {
+        $date_today = Carbon::now()
+            ->timeZone("Asia/Manila")
+            ->format("Y-m-d H:i");
+
+        $pr_transaction = PRTransaction::find($id);
+
+        $pr_transaction->update([
+            "rejected_at" => $date_today,
+            "reason" => $request->reason,
+        ]);
+        $pr_collect = new PRTransactionResource($pr_transaction);
+        return GlobalFunction::responseFunction(Message::REJECTED, $pr_collect);
+    }
+    // public function cancelled(Request $request, $id)
+    // {
+    // }
 }

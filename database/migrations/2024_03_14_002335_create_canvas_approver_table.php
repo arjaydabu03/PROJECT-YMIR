@@ -12,18 +12,16 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create("pr_approvers_history", function (Blueprint $table) {
+        Schema::create("canvas_approver", function (Blueprint $table) {
             $table->increments("id");
-            $table->unsignedInteger("pr_id")->index();
+            $table->unsignedInteger("approver_id");
             $table
-                ->foreign("pr_id")
+                ->foreign("approver_id")
                 ->references("id")
-                ->on("pr_transactions");
-            $table->string("approver_id");
+                ->on("users");
             $table->string("approver_name");
-            $table->timestamp("approved_at")->nullable();
-            $table->timestamp("rejected_at")->nullable();
-            $table->string("layer");
+            $table->string("from_price");
+            $table->string("to_price");
             $table->timestamps();
         });
     }
@@ -35,6 +33,6 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists("pr_approvers_history");
+        Schema::dropIfExists("canvas_approver");
     }
 };

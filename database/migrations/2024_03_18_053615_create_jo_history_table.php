@@ -12,13 +12,13 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create("pr_approvers_history", function (Blueprint $table) {
+        Schema::create("jo_history", function (Blueprint $table) {
             $table->increments("id");
-            $table->unsignedInteger("pr_id")->index();
+            $table->unsignedInteger("jo_id")->index();
             $table
-                ->foreign("pr_id")
+                ->foreign("jo_id")
                 ->references("id")
-                ->on("pr_transactions");
+                ->on("jo_transactions");
             $table->string("approver_id");
             $table->string("approver_name");
             $table->timestamp("approved_at")->nullable();
@@ -35,6 +35,6 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists("pr_approvers_history");
+        Schema::dropIfExists("jo_history");
     }
 };

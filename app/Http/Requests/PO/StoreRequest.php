@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\PurchaseRequest;
+namespace App\Http\Requests\PO;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -24,13 +24,7 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
-            "pr_number" => [
-                $this->route()->pr_transaction
-                    ? "unique:pr_transactions,pr_number," .
-                        $this->route()->pr_transaction
-                    : "unique:pr_transactions,pr_number",
-            ],
-            // "supplier_id" => "exists:suppliers,id,deleted_at,NULL",
+            "*approver_id" => ["required", "distinct", "string"],
         ];
     }
 }

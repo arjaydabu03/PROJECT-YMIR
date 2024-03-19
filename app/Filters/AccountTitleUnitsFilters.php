@@ -8,5 +8,5 @@ class AccountTitleUnitsFilters extends QueryFilters
 {
     protected array $allowedFilters = [];
 
-    protected array $columnSearch = [];
+    protected array $columnSearch = ["name"];
 }
