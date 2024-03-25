@@ -14,10 +14,7 @@ return new class extends Migration {
     {
         Schema::create("po_approvers", function (Blueprint $table) {
             $table->increments("id");
-            $table
-                ->unsignedInteger("approver_id")
-                ->unique()
-                ->index();
+            $table->unsignedInteger("approver_id");
             $table
                 ->foreign("approver_id")
                 ->references("id")

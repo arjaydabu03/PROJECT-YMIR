@@ -25,6 +25,7 @@ class StoreRequest extends FormRequest
     {
         return [
             "*approver_id" => ["required", "distinct", "string"],
+            "*layer" => ["distinct"],
         ];
     }
 }

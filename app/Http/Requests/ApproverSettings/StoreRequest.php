@@ -103,6 +103,7 @@ class StoreRequest extends FormRequest
                 "required",
                 "exists:users,id,deleted_at,NULL",
             ],
+            "settings_approver.*.layer" => ["distinct"],
         ];
     }
 

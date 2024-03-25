@@ -71,7 +71,7 @@ class JobOrderResource extends JsonResource
             "description" => $this->description,
             "reason" => $this->reason,
             "created_at" => $this->created_at,
-            "transactionItem" => JobOrderItemsResource::collection(
+            "order" => JobOrderItemsResource::collection(
                 $this->order
             ),
             "approver_history" => JobOrderHistoryResource::collection(

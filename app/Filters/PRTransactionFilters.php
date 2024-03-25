@@ -10,25 +10,32 @@ class PRTransactionFilters extends QueryFilters
 
     protected array $columnSearch = [];
 
-    public function filter($status)
+    public function status($status)
     {
-        $this->builder
-            ->when($status === "pending", function ($query) {
-                $query
+        $user_id = Auth()->user()->id;
 
+        $this->builder
+            ->when($status === "pending", function ($query) use ($user_id) {
+                $query->where("user_id", $user_id)->where("status", "Pending");
+            })
+            ->when($status === "cancel", function ($query) use ($user_id) {
+                $query
+                    ->whereNotNull("cancelled_at")
                     ->whereNull("approved_at")
-                    ->whereNull("rejected_at")
-                    ->whereNull("voided_at")
-                    ->whereNull("cancelled_at");
+                    ->where("user_id", $user_id);
             })
-            ->when($filter === "cancel", function ($query) {
-                $query->whereNotNull("cancelled_at")->whereNull("approved_at");
+            ->when($status === "voided", function ($query) use ($user_id) {
+                $query->whereNotNull("voided_at")->where("user_id", $user_id);
             })
-            ->when($filter === "voided", function ($query) {
-                $query->whereNotNull("voided_at");
+            ->when($status === "rejected", function ($query) use ($user_id) {
+                $query->whereNotNull("rejected_at")->where("user_id", $user_id);
             })
-            ->when($filter === "rejected", function ($query) {
-                $query->whereNotNull("rejected_at");
+            ->when($status === "approved", function ($query) use ($user_id) {
+                $query
+                    ->where("user_id", $user_id)
+                    ->whereHas("approver_history", function ($query) {
+                        $query->whereNotNull("approved_at");
+                    });
             });
     }
 }

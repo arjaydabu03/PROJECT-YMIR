@@ -21,8 +21,9 @@ class PRTransactionController extends Controller
 {
     public function index(PRViewRequest $request)
     {
-        $user_id = Auth()->user()->id;
         $status = $request->status;
+        $user_id = Auth()->user()->id;
+
         $purchase_request = PRTransaction::with("approver_history")
 
             ->orderByDesc("updated_at")
@@ -89,7 +90,7 @@ class PRTransactionController extends Controller
             "supplier_id" => $request->supplier_id,
             "supplier_name" => $request->supplier_name,
             "module_name" => "Inventoriables",
-            "status" => "For approval",
+            "status" => "Pending",
             "layer" => "1",
             "description" => $request->description,
         ]);

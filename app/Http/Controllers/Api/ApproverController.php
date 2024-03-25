@@ -30,42 +30,67 @@ class ApproverController extends Controller
             ->get()
             ->first();
 
-        $pr_approvers = PrHistory::where("approver_id", $user)
+        $pr_id = PrHistory::where("approver_id", $user)
             ->get()
-            ->first();
+            ->pluck("pr_id");
+        $layer = PrHistory::where("approver_id", $user)
+            ->get()
+            ->pluck("layer");
 
-        if (empty($pr_approvers)) {
+        if (empty($pr_id) || empty($layer)) {
             return GlobalFunction::notFound(Message::NOT_FOUND);
         }
 
-        $purchase_request = PRTransaction::with("order")
-            ->when($status == "pending", function ($query) use ($pr_approvers) {
+        $purchase_request = PRTransaction::with("order", "approver_history")
+            ->when($status == "pending", function ($query) use (
+                $pr_id,
+                $layer
+            ) {
                 $query
-                    ->where("id", $pr_approvers->pr_id)
-                    ->where("layer", $pr_approvers->layer)
+                    ->whereIn("id", $pr_id)
+                    ->whereIn("layer", $layer)
                     ->whereNull("voided_at")
+                    ->whereNull("cancelled_at")
                     ->whereNull("rejected_at");
             })
             ->when($status == "rejected", function ($query) use (
-                $pr_approvers
+                $pr_id,
+                $layer
             ) {
                 $query
-                    ->where("id", $pr_approvers->pr_id)
-                    ->where("layer", $pr_approvers->layer)
+                    ->whereIn("id", $pr_id)
+                    ->whereIn("layer", $layer)
                     ->whereNull("voided_at")
                     ->whereNotNull("rejected_at");
             })
-            ->useFilters()
-            ->dynamicPaginate();
+
+            ->when($status == "approved", function ($query) use (
+                $pr_id,
+                $layer,
+                $user_id
+            ) {
+                $query
+                    ->whereIn("id", $pr_id)
+                    ->whereHas("approver_history", function ($query) use (
+                        $user_id
+                    ) {
+                        $query
+                            ->whereIn("approver_id", $user_id)
+                            ->whereNotNull("approved_at");
+                    });
+            })
+            ->get();
 
         if ($purchase_request->isEmpty()) {
             return GlobalFunction::notFound(Message::NOT_FOUND);
         }
-        PRTransactionResource::collection($purchase_request);
+        $purchase_collect = PRTransactionResource::collection(
+            $purchase_request
+        );
 
         return GlobalFunction::responseFunction(
             Message::PURCHASE_REQUEST_DISPLAY,
-            $purchase_request
+            $purchase_collect
         );
     }
 

@@ -71,7 +71,7 @@ class PRTransactionResource extends JsonResource
             "description" => $this->description,
             "reason" => $this->reason,
             "created_at" => $this->created_at,
-            "transactionItem" => PRItemsResource::collection($this->order),
+            "order" => PRItemsResource::collection($this->order),
             "approver_history" => ApporverHistoryResource::collection(
                 $this->approver_history
             ),
