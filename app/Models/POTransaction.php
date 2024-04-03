@@ -2,23 +2,24 @@
 
 namespace App\Models;
 
-use App\Filters\PRTransactionFilters;
+use App\Filters\PoFilters;
 use Essa\APIToolKit\Filters\Filterable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class PRTransaction extends Model
+class POTransaction extends Model
 {
     use Filterable, HasFactory, SoftDeletes;
 
-    protected $table = "pr_transactions";
+    protected string $default_filters = PoFilters::class;
 
-    protected string $default_filters = PRTransactionFilters::class;
+    protected $table = "po_transactions";
 
     protected $fillable = [
         "pr_number",
-        "pr_description",
+        "po_number",
+        "po_description",
         "date_needed",
         "user_id",
         "type_id",
@@ -37,8 +38,6 @@ class PRTransaction extends Model
         "sub_unit_name",
         "account_title_id",
         "account_title_name",
-        "supplier_id",
-        "supplier_name",
         "module_name",
         "status",
         "layer",
@@ -55,19 +54,4 @@ class PRTransaction extends Model
 
         "approver_id",
     ];
-
-    public function users()
-    {
-        return $this->belongsTo(User::class, "user_id", "id")->withTrashed();
-    }
-
-    public function order()
-    {
-        return $this->hasMany(PRItems::class, "transaction_id", "id");
-    }
-
-    public function approver_history()
-    {
-        return $this->hasMany(PrHistory::class, "pr_id", "id");
-    }
 }

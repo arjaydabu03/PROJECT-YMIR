@@ -34,6 +34,7 @@ class Message
     const ACCOUNT_TITLE_SAVE = "Account title successfully save.";
     const PURCHASE_REQUEST_SAVE = "Purchase request successfully save.";
     const APPROVERS_SAVE = "Approvers successfully save.";
+    const PURCHASE_ORDER_SAVE = "Purchase order successfully save.";
 
     // DISPLAY DATA
     const USER_DISPLAY = "User display successfully.";
@@ -59,6 +60,7 @@ class Message
     const ACCOUNT_TITLE_DISPLAY = "Account title  display successfully.";
     const PURCHASE_REQUEST_DISPLAY = "Purchase request  display successfully.";
     const APPROVERS_DISPLAY = "Approvers display successfully.";
+    const PURCHASE_ORDER_DISPLAY = "Purchase order  display successfully.";
 
     //UPDATE
     const USER_UPDATE = "User successfully updated.";
@@ -84,6 +86,7 @@ class Message
     const ACCOUNT_TITLE_UPDATE = "Account title successfully updated.";
     const PURCHASE_REQUEST_UPDATE = "Purchase request successfully updated.";
     const APPROVERS_UPDATE = "Approvers successfully updated.";
+    const PURCHASE_ORDER_UPDATE = "Purchase order successfully updated.";
 
     //SOFT DELETE
     const ARCHIVE_STATUS = "Successfully archived.";
@@ -107,6 +110,8 @@ class Message
     const IN_USE_DEPARTMENT_UNIT = "This department unit is in used.";
     const IN_USE_SUB_UNIT = "This sub unit is in used.";
     const IN_USE_BUSINESS_UNIT = "This business unit is in used.";
+
+    const NO_APPROVERS = "No approvers yet.";
 
     //PR RESPONSE
     const CANCELLED = "Purchase request has been cancelled.";

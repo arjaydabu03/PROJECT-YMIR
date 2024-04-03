@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\PoController;
 use App\Http\Controllers\Api\UomController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\RoleController;
@@ -44,8 +45,14 @@ use App\Http\Controllers\Api\JobOrderTransactionController;
 
 Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::post("logout", [UserController::class, "logout"]);
-    Route::patch("reset_password", [UserController::class, "resetPassword"]);
-    Route::patch("change_password", [UserController::class, "changePassword"]);
+    Route::patch("reset_password/{id}", [
+        UserController::class,
+        "resetPassword",
+    ]);
+    Route::patch("change_password/{id}", [
+        UserController::class,
+        "changePassword",
+    ]);
     Route::patch("users/archived/{id}", [UserController::class, "destroy"]);
     Route::apiResource("users", UserController::class);
 
@@ -163,6 +170,8 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     ]);
 
     Route::apiResource("pr_transaction", PRTransactionController::class);
+
+    Route::apiResource("po_transaction", PoController::class);
 
     Route::patch("approvers_settings/archived/{id}", [
         ApproverSettingsController::class,

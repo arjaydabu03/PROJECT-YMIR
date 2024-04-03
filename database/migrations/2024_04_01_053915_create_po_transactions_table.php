@@ -12,10 +12,11 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create("pr_transactions", function (Blueprint $table) {
+        Schema::create("po_transactions", function (Blueprint $table) {
             $table->increments("id");
             $table->integer("pr_number");
-            $table->string("pr_description");
+            $table->integer("po_number");
+            $table->string("po_description");
             $table->timestamp("date_needed");
 
             $table->unsignedInteger("user_id")->index();
@@ -80,12 +81,6 @@ return new class extends Migration {
                 ->on("account_titles");
             $table->string("account_title_name");
 
-            $table->unsignedInteger("supplier_id")->index();
-            $table
-                ->foreign("supplier_id")
-                ->references("id")
-                ->on("suppliers");
-            $table->string("supplier_name");
             $table->string("module_name");
             $table->string("layer");
             $table->string("status")->nullable();
@@ -111,6 +106,6 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists("pr_transactions");
+        Schema::dropIfExists("po_transactions");
     }
 };

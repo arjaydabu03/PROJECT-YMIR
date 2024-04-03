@@ -50,6 +50,7 @@ class UserController extends Controller
             "last_name" => $request->last_name,
             "suffix" => $request->suffix,
             "position_name" => $request->position_name,
+            "mobile_no" => $request->mobile_no,
             "company_id" => $request->company_id,
             "business_unit_id" => $request->business_unit_id,
             "department_id" => $request->department_id,
@@ -83,6 +84,7 @@ class UserController extends Controller
             "last_name" => $request->last_name,
             "suffix" => $request->suffix,
             "position_name" => $request->position_name,
+            "mobile_no" => $request->mobile_no,
             "company_id" => $request->company_id,
             "business_unit_id" => $request->business_unit_id,
             "department_id" => $request->department_id,
@@ -172,6 +174,7 @@ class UserController extends Controller
         $user = User::find($id);
 
         if (!$user) {
+            return GlobalFunction::invalid(Message::INVALID_ACTION);
         }
 
         $user->update([

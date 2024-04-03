@@ -14,6 +14,7 @@ use App\Models\ApproverSettings;
 use App\Functions\GlobalFunction;
 use App\Models\JobOrderTransaction;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Http;
 use App\Http\Resources\JobOrderResource;
 use App\Http\Requests\Approver\RejectRequest;
 use App\Http\Resources\PRTransactionResource;
@@ -47,8 +48,10 @@ class ApproverController extends Controller
                 $layer
             ) {
                 $query
+
                     ->whereIn("id", $pr_id)
                     ->whereIn("layer", $layer)
+                    ->where("status", "Pending")
                     ->whereNull("voided_at")
                     ->whereNull("cancelled_at")
                     ->whereNull("rejected_at");

@@ -22,21 +22,43 @@ class ExpenseController extends Controller
         $user_id = Auth()->user()->id;
         $status = $request->status;
         $purchase_request = PRTransaction::with("approver_history")
-            ->where("user_id", $user_id)
-            ->useFilters()
+            ->where("module_name", "Expense")
+            ->when($status === "pending", function ($query) use ($user_id) {
+                $query->where("user_id", $user_id)->where("status", "Pending");
+            })
+            ->when($status === "cancel", function ($query) use ($user_id) {
+                $query
+                    ->whereNotNull("cancelled_at")
+                    ->whereNull("approved_at")
+                    ->where("user_id", $user_id);
+            })
+            ->when($status === "voided", function ($query) use ($user_id) {
+                $query->whereNotNull("voided_at")->where("user_id", $user_id);
+            })
+            ->when($status === "rejected", function ($query) use ($user_id) {
+                $query->whereNotNull("rejected_at")->where("user_id", $user_id);
+            })
+            ->when($status === "approved", function ($query) use ($user_id) {
+                $query
+                    ->where("user_id", $user_id)
+                    ->whereHas("approver_history", function ($query) {
+                        $query->whereNotNull("approved_at");
+                    });
+            })
+
             ->orderByDesc("updated_at")
-            ->dynamicPaginate();
+            ->get();
 
         $is_empty = $purchase_request->isEmpty();
 
         if ($is_empty) {
             return GlobalFunction::notFound(Message::NOT_FOUND);
         }
-        PRTransactionResource::collection($purchase_request);
+        $pr_collect = PRTransactionResource::collection($purchase_request);
 
         return GlobalFunction::responseFunction(
             Message::PURCHASE_REQUEST_DISPLAY,
-            $purchase_request
+            $pr_collect
         );
     }
 
@@ -72,10 +94,13 @@ class ExpenseController extends Controller
             "sub_unit_name" => $request["sub_unit_name"],
             "account_title_id" => $request["account_title_id"],
             "account_title_name" => $request["account_title_name"],
-            "supplier_id" => $request["supplier_id"],
-            "supplier_name" => $request["supplier_name"],
-            "module_name" => "Inventoriables",
+            "module_name" => "Expense",
             "description" => $request["description"],
+            "asset" => $request["asset"],
+            "status" => "Pending",
+            "sgp" => $request["sgp"],
+            "f1" => $request["f1"],
+            "f2" => $request["f2"],
             "layer" => "1",
         ]);
         $purchase_request->save();
@@ -83,12 +108,9 @@ class ExpenseController extends Controller
         foreach ($orders as $index => $values) {
             PRItems::create([
                 "transaction_id" => $purchase_request->id,
-                "item_id" => $request["order"][$index]["item_id"],
-                "item_code" => $request["order"][$index]["item_code"],
                 "item_name" => $request["order"][$index]["item_name"],
                 "uom_id" => $request["order"][$index]["uom_id"],
                 "quantity" => $request["order"][$index]["quantity"],
-                "canvas" => $request["order"][$index]["canvas"],
                 "remarks" => $request["order"][$index]["remarks"],
             ]);
         }
@@ -109,6 +131,9 @@ class ExpenseController extends Controller
             "approver_settings_id",
             $approver_settings->id
         )->get();
+        if ($approvers->isEmpty()) {
+            return GlobalFunction::save(Message::NO_APPROVERS);
+        }
 
         foreach ($approvers as $index) {
             PrHistory::create([
@@ -140,7 +165,7 @@ class ExpenseController extends Controller
         $orders = $request->order;
 
         $purchase_request->update([
-            "pr_number" => "1",
+            "pr_number" => $request["pr_number"],
             "pr_description" => $request["pr_description"],
             "date_needed" => $request["date_needed"],
             "user_id" => $user_id,
@@ -162,8 +187,12 @@ class ExpenseController extends Controller
             "account_title_name" => $request["account_title_name"],
             "supplier_id" => $request["supplier_id"],
             "supplier_name" => $request["supplier_name"],
-            "module_name" => $request["module_name"],
+            "module_name" => "Expense",
             "description" => $request["description"],
+            "asset" => $request["asset"],
+            "sgp" => $request["sgp"],
+            "f1" => $request["f1"],
+            "f2" => $request["f2"],
         ]);
 
         $newOrders = collect($orders)
@@ -187,12 +216,9 @@ class ExpenseController extends Controller
                 ],
                 [
                     "transaction_id" => $purchase_request->id,
-                    "item_id" => $values["item_id"],
-                    "item_code" => $values["item_code"],
                     "item_name" => $values["item_name"],
                     "uom_id" => $values["uom_id"],
                     "quantity" => $values["quantity"],
-                    "canvas" => $values["canvas"],
                     "remarks" => $values["remarks"],
                 ]
             );

@@ -21,6 +21,7 @@ return new class extends Migration {
             $table->string("last_name");
             $table->string("suffix")->nullable();
             $table->string("position_name");
+            $table->string("mobile_no")->nullable();
             $table->unsignedInteger("company_id")->index();
             $table
                 ->foreign("company_id")

@@ -22,6 +22,7 @@ class User extends Authenticatable
         "last_name",
         "suffix",
         "position_name",
+        "mobile_no",
         "company_id",
         "business_unit_id",
         "department_id",

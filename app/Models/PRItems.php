@@ -18,8 +18,6 @@ class PRItems extends Model
         "item_name",
         "uom_id",
         "quantity",
-        "canvas_po",
-        "canvas_at",
         "remarks",
     ];
     protected $hidden = ["created_at"];
