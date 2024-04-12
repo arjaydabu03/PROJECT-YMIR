@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\SubUnit;
 use App\Response\Message;
+use App\Models\Department;
 use Illuminate\Http\Request;
 use App\Models\DepartmentUnit;
 use App\Functions\GlobalFunction;
@@ -12,6 +13,7 @@ use App\Http\Requests\DisplayRequest;
 use App\Http\Resources\DepartmentUnitResource;
 use App\Http\Requests\DepartmentUnit\StoreRequest;
 use App\Http\Resources\DepartmentUnitSaveResource;
+use App\Http\Requests\DepartmentUnit\ImportRequest;
 
 class DepartmentUnitController extends Controller
 {
@@ -109,5 +111,24 @@ class DepartmentUnitController extends Controller
             $message = Message::RESTORE_STATUS;
         }
         return GlobalFunction::responseFunction($message, $department_unit);
+    }
+
+    public function import(ImportRequest $request)
+    {
+        $import = $request->all();
+
+        foreach ($import as $index) {
+            $department = $index["department"];
+
+            $department_id = Department::where("name", $department)->first();
+
+            $department = DepartmentUnit::create([
+                "name" => $index["name"],
+                "code" => $index["code"],
+                "department_id" => $department_id->id,
+            ]);
+        }
+
+        return GlobalFunction::save(Message::DEPARTMENT_UNIT_SAVE, $import);
     }
 }

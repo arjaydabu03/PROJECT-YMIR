@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\SubUnit;
 use App\Models\Location;
 use App\Response\Message;
 use Illuminate\Http\Request;
+use App\Models\LocationSubUnit;
 use App\Functions\GlobalFunction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DisplayRequest;
 use App\Http\Resources\LocationResource;
 use App\Http\Requests\Location\StoreRequest;
+use App\Http\Requests\Location\ImportRequest;
 
 class LocationController extends Controller
 {
@@ -97,5 +100,32 @@ class LocationController extends Controller
             $message = Message::RESTORE_STATUS;
         }
         return GlobalFunction::responseFunction($message, $location);
+    }
+
+    public function import(ImportRequest $request)
+    {
+        $import = $request->all();
+
+        foreach ($import as $index) {
+            $location = new Location([
+                "name" => $index["name"],
+                "code" => $index["code"],
+            ]);
+            $location->save();
+
+            $sub_unit = $index["sub_unit"];
+
+            foreach ($sub_unit as $index) {
+                $sub_unit_name = $index["sub_unit_id"];
+                $sub_unit_id = SubUnit::where("name", $sub_unit_name)->first();
+
+                $location = LocationSubUnit::create([
+                    "location_id" => $location->id,
+                    "sub_unit_id" => $sub_unit_id->id,
+                ]);
+            }
+        }
+
+        return GlobalFunction::save(Message::LOCATION_SAVE, $import);
     }
 }

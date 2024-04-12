@@ -12,6 +12,7 @@ use App\Http\Requests\DisplayRequest;
 use App\Http\Resources\CompanyResource;
 use App\Http\Requests\Company\StoreRequest;
 use App\Http\Resources\CompanySaveResource;
+use App\Http\Requests\Company\ImportRequest;
 
 class CompanyController extends Controller
 {
@@ -105,5 +106,19 @@ class CompanyController extends Controller
             $message = Message::RESTORE_STATUS;
         }
         return GlobalFunction::responseFunction($message, $company);
+    }
+
+    public function import(ImportRequest $request)
+    {
+        $import = $request->all();
+
+        foreach ($import as $index) {
+            $company = Company::create([
+                "name" => $index["name"],
+                "code" => $index["code"],
+            ]);
+        }
+
+        return GlobalFunction::save(Message::COMPANY_SAVE, $import);
     }
 }

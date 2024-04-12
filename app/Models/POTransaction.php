@@ -51,7 +51,21 @@ class POTransaction extends Model
         "rejected_at",
         "voided_at",
         "cancelled_at",
-
         "approver_id",
     ];
+
+    public function users()
+    {
+        return $this->belongsTo(User::class, "user_id", "id")->withTrashed();
+    }
+
+    public function order()
+    {
+        return $this->hasMany(POItems::class, "po_id", "id");
+    }
+
+    public function approver_history()
+    {
+        return $this->hasMany(PoHistory::class, "po_id", "id");
+    }
 }

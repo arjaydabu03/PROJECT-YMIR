@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\JobOrderTransaction;
 
+use App\Models\ApproverSettings;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreRequest extends FormRequest
@@ -32,4 +33,30 @@ class StoreRequest extends FormRequest
             ],
         ];
     }
+    // public function withValidator($validator)
+    // {
+    //     $validator->after(function ($validator) {
+    //         // $validator->errors()->add("custom", $this->user()->id);
+    //         // $validator->errors()->add("custom", $this->route()->id);
+    //         // $validator->errors()->add("custom", "STOP!");
+
+    //         $approvers = ApproverSettings::where(
+    //             "business_unit_id",
+    //             $this->input("business_unit_id")
+    //         )
+    //             ->where("company_id", $this->input("company_id"))
+    //             ->where("department_id", $this->input("department_id"))
+    //             ->where(
+    //                 "department_unit_id",
+    //                 $this->input("department_unit_id")
+    //             )
+    //             ->where("sub_unit_id", $this->input("sub_unit_id"))
+    //             ->where("location_id", $this->input("location_id"))
+    //             ->get()
+    //             ->first();
+    //         if (!$approvers) {
+    //             $validator->errors()->add("message", "No approvers yet.");
+    //         }
+    //     });
+    // }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Response\Message;
 use App\Models\Department;
+use App\Models\BusinessUnit;
 use Illuminate\Http\Request;
 use App\Models\DepartmentUnit;
 use App\Functions\GlobalFunction;
@@ -107,5 +108,26 @@ class DepartmentController extends Controller
             $message = Message::RESTORE_STATUS;
         }
         return GlobalFunction::responseFunction($message, $department);
+    }
+    public function import(ImportRequest $request)
+    {
+        $import = $request->all();
+
+        foreach ($import as $index) {
+            $business_unit = $index["business_unit"];
+
+            $business_unit_id = BusinessUnit::where(
+                "name",
+                $business_unit
+            )->first();
+
+            $department = Department::create([
+                "name" => $index["name"],
+                "code" => $index["code"],
+                "business_unit_id" => $business_unit_id->id,
+            ]);
+        }
+
+        return GlobalFunction::save(Message::DEPARTMENT_SAVE, $import);
     }
 }

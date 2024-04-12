@@ -27,6 +27,8 @@ return new class extends Migration {
                 ->on("uoms");
 
             $table->double("quantity");
+            $table->double("unit_price");
+            $table->double("total_price");
             $table->string("remarks")->nullable();
             $table->timestamps();
             $table->softDeletes();

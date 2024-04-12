@@ -32,6 +32,7 @@ class StoreRequest extends FormRequest
                 "string",
             ],
             "name" => ["required", "string"],
+            "uom_id" => ["required", "exists:uoms,id,deleted_at,NULL"],
         ];
     }
 }

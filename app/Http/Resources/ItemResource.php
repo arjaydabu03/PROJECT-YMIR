@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\UomResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ItemResource extends JsonResource
@@ -18,6 +19,11 @@ class ItemResource extends JsonResource
             "id" => $this->id,
             "code" => $this->code,
             "name" => $this->name,
+            "uom" => [
+                "id" => $this->uom->id,
+                "name" => $this->uom->name,
+                "code" => $this->uom->code,
+            ],
             "updated_at" => $this->updated_at,
             "deleted_at" => $this->deleted_at,
         ];

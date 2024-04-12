@@ -15,7 +15,6 @@ class PRItemsResource extends JsonResource
     public function toArray($request)
     {
         return [
-            // "id"  =>$this->id,
             "transaction_id" => $this->transaction_id,
             "item" => [
                 "id" => $this->item_id,
@@ -24,7 +23,6 @@ class PRItemsResource extends JsonResource
             ],
             "uom" => $this->uom_id,
             "quantity" => $this->quantity,
-            "canvas" => $this->canvas,
             "remarks" => $this->remarks,
         ];
     }

@@ -32,6 +32,13 @@ class StoreRequest extends FormRequest
                     : "unique:pr_transactions,pr_number",
             ],
             // "supplier_id" => "exists:suppliers,id,deleted_at,NULL",
+            "company_id" => "exists:companies,id,deleted_at,NULL",
+            "business_unit_id" => "exists:business_units,id,deleted_at,NULL",
+            "department_id" => "exists:departments,id,deleted_at,NULL",
+            "department_unit_id" =>
+                "exists:department_units,id,deleted_at,NULL",
+            "sub_unit_id" => "exists:sub_units,id,deleted_at,NULL",
+            "location_id" => "exists:locations,id,deleted_at,NULL",
         ];
     }
     public function withValidator($validator)

@@ -85,8 +85,6 @@ class JobOrderTransactionController extends Controller
             "sub_unit_name" => $user_details->sub_unit->name,
             "account_title_id" => $request->account_title_id,
             "account_title_name" => $request->account_title_name,
-            "supplier_id" => $request->supplier_id,
-            "supplier_name" => $request->supplier_name,
             "module_name" => "Job Order",
             "layer" => "1",
             "description" => $request->description,
@@ -99,6 +97,8 @@ class JobOrderTransactionController extends Controller
                 "description" => $request["order"][$index]["description"],
                 "uom_id" => $request["order"][$index]["uom_id"],
                 "quantity" => $request["order"][$index]["quantity"],
+                "unit_price" => $values["unit_price"],
+                "total_price" => $values["unit_price"] * $values["quantity"],
                 "remarks" => $request["order"][$index]["remarks"],
             ]);
         }
@@ -149,7 +149,7 @@ class JobOrderTransactionController extends Controller
         if (!$not_found) {
             return GlobalFunction::not_found(Message::NOT_FOUND);
         }
-        $user_id = Auth()->user()->id;
+        return $user_id = Auth()->user()->id;
 
         $orders = $request->order;
 
@@ -186,8 +186,6 @@ class JobOrderTransactionController extends Controller
             "sub_unit_name" => $user_details->sub_unit->name,
             "account_title_id" => $request->account_title_id,
             "account_title_name" => $request->account_title_name,
-            "supplier_id" => $request->supplier_id,
-            "supplier_name" => $request->supplier_name,
             "module_name" => "Job Order",
             "description" => $request->description,
         ]);
@@ -216,6 +214,9 @@ class JobOrderTransactionController extends Controller
                     "description" => $values["description"],
                     "uom_id" => $values["uom_id"],
                     "quantity" => $values["quantity"],
+                    "unit_price" => $values["unit_price"],
+                    "total_price" =>
+                        $values["unit_price"] * $values["quantity"],
                     "remarks" => $values["remarks"],
                 ]
             );

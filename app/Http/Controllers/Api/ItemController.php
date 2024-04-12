@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Uom;
 use App\Models\Items;
 use App\Response\Message;
 use Illuminate\Http\Request;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ItemResource;
 use App\Http\Requests\DisplayRequest;
 use App\Http\Requests\Item\StoreRequest;
+use App\Http\Requests\Item\ImportRequest;
 
 class ItemController extends Controller
 {
@@ -20,7 +22,6 @@ class ItemController extends Controller
         $item = Items::when($status === "inactive", function ($query) {
             $query->onlyTrashed();
         })
-
             ->useFilters()
             ->orderByDesc("updated_at")
             ->dynamicPaginate();
@@ -39,11 +40,12 @@ class ItemController extends Controller
         $item = Items::create([
             "code" => $request->code,
             "name" => $request->name,
+            "uom_id" => $request->uom_id,
         ]);
 
-        $uom_collect = new ItemResource($item);
+        $item_collect = new ItemResource($item);
 
-        return GlobalFunction::save(Message::ITEM_SAVE, $uom_collect);
+        return GlobalFunction::save(Message::ITEM_SAVE, $item_collect);
     }
 
     public function update(StoreRequest $request, $id)
@@ -58,8 +60,14 @@ class ItemController extends Controller
         $item->update([
             "code" => $request->code,
             "name" => $request->name,
+            "uom_id" => $request->uom_id,
         ]);
-        return GlobalFunction::responseFunction(Message::ITEM_UPDATE, $item);
+
+        $item_collect = new ItemResource($item);
+        return GlobalFunction::responseFunction(
+            Message::ITEM_UPDATE,
+            $item_collect
+        );
     }
 
     public function destroy($id)
@@ -86,5 +94,23 @@ class ItemController extends Controller
             $message = Message::RESTORE_STATUS;
         }
         return GlobalFunction::responseFunction($message, $item);
+    }
+    public function import(ImportRequest $request)
+    {
+        $import = $request->all();
+
+        foreach ($import as $index) {
+            $uom = $index["uom"];
+
+            $uom_id = Uom::where("name", $uom)->first();
+
+            $department = DepartmentUnit::create([
+                "name" => $index["name"],
+                "code" => $index["code"],
+                "uom_id" => $uom_id->id,
+            ]);
+        }
+
+        return GlobalFunction::save(Message::ITEM_SAVE, $import);
     }
 }

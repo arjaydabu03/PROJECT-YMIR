@@ -12,7 +12,6 @@ use App\Http\Controllers\Api\CanvasController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\SubUnitController;
-use App\Http\Controllers\Api\ApproverController;
 use App\Http\Controllers\Api\BusinessController;
 use App\Http\Controllers\Api\JobOrderController;
 use App\Http\Controllers\Api\LocationController;
@@ -20,6 +19,7 @@ use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\FinancialController;
 use App\Http\Controllers\Api\WarehouseController;
 use App\Http\Controllers\Api\DepartmentController;
+use App\Http\Controllers\Api\PrApproverController;
 use App\Http\Controllers\Api\AccountTypeController;
 use App\Http\Controllers\Api\PoApproversController;
 use App\Http\Controllers\Api\AccountGroupController;
@@ -31,6 +31,7 @@ use App\Http\Controllers\Api\AccountSubGroupController;
 use App\Http\Controllers\Api\AccountTitleUnitController;
 use App\Http\Controllers\Api\ApproverSettingsController;
 use App\Http\Controllers\Api\JobOrderTransactionController;
+use App\Http\Controllers\Api\PoApproverDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,30 +64,36 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
         CompanyController::class,
         "destroy",
     ]);
+
+    Route::post("companies/import", [CompanyController::class, "import"]);
     Route::apiResource("companies", CompanyController::class);
 
     Route::patch("business-units/archived/{id}", [
         BusinessController::class,
         "destroy",
     ]);
+    Route::post("business-units/import", [BusinessController::class, "import"]);
     Route::apiResource("business-units", BusinessController::class);
 
     Route::patch("departments/archived/{id}", [
         DepartmentController::class,
         "destroy",
     ]);
+    Route::post("departments/import", [DepartmentController::class, "import"]);
     Route::apiResource("departments", DepartmentController::class);
 
     Route::patch("sub_units/archived/{id}", [
         SubUnitController::class,
         "destroy",
     ]);
+    Route::post("sub_units/import", [SubUnitController::class, "import"]);
     Route::apiResource("sub_units", SubUnitController::class);
 
     Route::patch("locations/archived/{id}", [
         LocationController::class,
         "destroy",
     ]);
+    Route::post("locations/import", [LocationController::class, "import"]);
     Route::apiResource("locations", LocationController::class);
 
     Route::patch("warehouses/archived/{id}", [
@@ -138,6 +145,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::apiResource("types", TypeController::class);
 
     Route::patch("uoms/archived/{id}", [UomController::class, "destroy"]);
+    Route::post("uoms/import", [UomController::class, "import"]);
     Route::apiResource("uoms", UomController::class);
 
     Route::patch("suppliers/archived/{id}", [
@@ -150,11 +158,16 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::apiResource("units", UnitController::class);
 
     Route::patch("items/archived/{id}", [ItemController::class, "destroy"]);
+    Route::post("items/import", [ItemController::class, "import"]);
     Route::apiResource("items", ItemController::class);
 
     Route::patch("units_department/archived/{id}", [
         DepartmentUnitController::class,
         "destroy",
+    ]);
+    Route::post("units_department/import", [
+        DepartmentUnitController::class,
+        "import",
     ]);
     Route::apiResource("units_department", DepartmentUnitController::class);
 
@@ -180,12 +193,12 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
 
     Route::apiResource("approvers_settings", ApproverSettingsController::class);
 
-    Route::patch("approved/{id}", [ApproverController::class, "approved"]);
-    Route::get("job_approver", [ApproverController::class, "job_order"]);
-    Route::apiResource("approver_dashboard", ApproverController::class);
-    Route::patch("cancelled/{id}", [ApproverController::class, "cancelled"]);
-    Route::patch("void/{id}", [ApproverController::class, "voided"]);
-    Route::patch("rejected/{id}", [ApproverController::class, "rejected"]);
+    Route::patch("approved/{id}", [PrApproverController::class, "approved"]);
+    Route::patch("cancelled/{id}", [PrApproverController::class, "cancelled"]);
+    Route::patch("void/{id}", [PrApproverController::class, "voided"]);
+    Route::patch("rejected/{id}", [PrApproverController::class, "rejected"]);
+    Route::get("job_approver", [PrApproverController::class, "job_order"]);
+    Route::apiResource("approver_dashboard", PrApproverController::class);
 
     Route::patch("job_order/archived/{id}", [
         JobOrderController::class,
@@ -213,6 +226,11 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::apiResource(
         "job_order_transaction",
         JobOrderTransactionController::class
+    );
+
+    Route::apiResource(
+        "po_approver_dashboard",
+        PoApproverDashboardController::class
     );
 });
 Route::post("login", [UserController::class, "login"]);

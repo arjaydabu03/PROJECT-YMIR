@@ -6,12 +6,14 @@ use App\Models\SubUnit;
 use App\Models\Location;
 use App\Response\Message;
 use Illuminate\Http\Request;
+use App\Models\DepartmentUnit;
 use App\Functions\GlobalFunction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DisplayRequest;
 use App\Http\Resources\SubUnitResource;
 use App\Http\Requests\SubUnit\StoreRequest;
 use App\Http\Resources\SubUnitSaveResource;
+use App\Http\Requests\SubUnit\ImportRequest;
 
 class SubUnitController extends Controller
 {
@@ -106,5 +108,27 @@ class SubUnitController extends Controller
             $message = Message::RESTORE_STATUS;
         }
         return GlobalFunction::responseFunction($message, $subunit);
+    }
+
+    public function import(ImportRequest $request)
+    {
+        $import = $request->all();
+
+        foreach ($import as $index) {
+            $department_unit = $index["department_unit"];
+
+            $department_unit_id = DepartmentUnit::where(
+                "name",
+                $department_unit
+            )->first();
+
+            $department = SubUnit::create([
+                "name" => $index["name"],
+                "code" => $index["code"],
+                "department_unit_id" => $department_unit_id->id,
+            ]);
+        }
+
+        return GlobalFunction::save(Message::DEPARTMENT_UNIT_SAVE, $import);
     }
 }

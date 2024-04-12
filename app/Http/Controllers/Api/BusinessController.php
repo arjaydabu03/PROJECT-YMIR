@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Company;
 use App\Response\Message;
 use App\Models\Department;
 use App\Models\BusinessUnit;
@@ -12,6 +13,7 @@ use App\Http\Requests\DisplayRequest;
 use App\Http\Resources\BusinessResource;
 use App\Http\Requests\BusinessUnit\StoreRequest;
 use App\Http\Resources\BusinessUnitSaveResource;
+use App\Http\Requests\BusinessUnit\ImportRequest;
 
 class BusinessController extends Controller
 {
@@ -107,5 +109,24 @@ class BusinessController extends Controller
             $message = Message::RESTORE_STATUS;
         }
         return GlobalFunction::responseFunction($message, $business_unit);
+    }
+
+    public function import(ImportRequest $request)
+    {
+        $import = $request->all();
+
+        foreach ($import as $index) {
+            $company = $index["company"];
+
+            $company_id = Company::where("name", $company)->first();
+
+            $business_unit = BusinessUnit::create([
+                "name" => $index["name"],
+                "code" => $index["code"],
+                "company_id" => $company_id->id,
+            ]);
+        }
+
+        return GlobalFunction::save(Message::BUSINESS_SAVE, $import);
     }
 }

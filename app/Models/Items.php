@@ -14,6 +14,11 @@ class Items extends Model
 
     protected string $default_filters = ItemFilters::class;
 
-    protected $fillable = ["name", "code"];
+    protected $fillable = ["name", "code", "uom_id"];
     protected $hidden = ["created_at"];
+
+    public function uom()
+    {
+        return $this->belongsTo(Uom::class, "uom_id", "id");
+    }
 }

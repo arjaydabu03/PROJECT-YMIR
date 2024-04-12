@@ -16,6 +16,11 @@ return new class extends Migration {
             $table->increments("id");
             $table->string("code");
             $table->string("name");
+            $table->unsignedInteger("uom_id")->index();
+            $table
+                ->foreign("uom_id")
+                ->references("id")
+                ->on("uoms");
             $table->timestamps();
             $table->softDeletes();
         });

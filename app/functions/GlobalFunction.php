@@ -37,12 +37,11 @@ class GlobalFunction
         );
     }
 
-    public static function invalid($message, $result = [])
+    public static function invalid($message)
     {
         return response()->json(
             [
                 "message" => $message,
-                "result" => $result,
             ],
             Message::UNPROCESS_STATUS
         );

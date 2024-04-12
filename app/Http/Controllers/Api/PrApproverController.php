@@ -19,7 +19,7 @@ use App\Http\Resources\JobOrderResource;
 use App\Http\Requests\Approver\RejectRequest;
 use App\Http\Resources\PRTransactionResource;
 
-class ApproverController extends Controller
+class PrApproverController extends Controller
 {
     public function index(Request $request)
     {
@@ -74,6 +74,8 @@ class ApproverController extends Controller
             ) {
                 $query
                     ->whereIn("id", $pr_id)
+                    ->whereNull("cancelled_at")
+                    ->whereNull("voided_at")
                     ->whereHas("approver_history", function ($query) use (
                         $user_id
                     ) {
@@ -202,13 +204,11 @@ class ApproverController extends Controller
             ->timeZone("Asia/Manila")
             ->format("Y-m-d H:i");
 
-        $pr_transaction = PRTransaction::find($id)
-            ->where("user_id", $user)
-            ->get()
-            ->first();
+        $pr_transaction = PRTransaction::find($id);
 
         $pr_transaction->update([
             "cancelled_at" => $date_today,
+            "status" => "Cancelled",
         ]);
         $pr_collect = new PRTransactionResource($pr_transaction);
 

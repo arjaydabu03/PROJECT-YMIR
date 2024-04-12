@@ -10,6 +10,7 @@ use App\Http\Resources\UomResource;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DisplayRequest;
 use App\Http\Requests\Uom\StoreRequest;
+use App\Http\Requests\Uom\ImportRequest;
 
 class UomController extends Controller
 {
@@ -86,5 +87,19 @@ class UomController extends Controller
             $message = Message::RESTORE_STATUS;
         }
         return GlobalFunction::responseFunction($message, $uom);
+    }
+
+    public function import(ImportRequest $request)
+    {
+        $import = $request->all();
+
+        foreach ($import as $index) {
+            $company = Uom::create([
+                "name" => $index["name"],
+                "code" => $index["code"],
+            ]);
+        }
+
+        return GlobalFunction::save(Message::UOM_SAVE, $import);
     }
 }

@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class JobOrderItemsResource extends JsonResource
+class PoItemResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,12 +16,17 @@ class JobOrderItemsResource extends JsonResource
     {
         return [
             // "id"  =>$this->id,
-            "jo_transaction_id" => $this->jo_transaction_id,
-            "description" => $this->description,
+            "pr_id" => $this->pr_id,
+            "po_id" => $this->po_id,
+            "item" => [
+                "id" => $this->item_id,
+                "name" => $this->item_name,
+                "code" => $this->item_code,
+            ],
             "uom" => $this->uom_id,
             "quantity" => $this->quantity,
-            "unit_price" => $this->unit_price,
-            "total_price" => $this->total_price,
+            "quantity_serve" => $this->quantity_serve,
+            "supplier_id" => $this->supplier_id,
             "remarks" => $this->remarks,
         ];
     }
