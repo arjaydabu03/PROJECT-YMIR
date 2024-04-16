@@ -25,8 +25,9 @@ class ImportRequest extends FormRequest
     {
         return [
             "*.code" => ["unique:departments,code", "distinct"],
-            "*.business_unit_id" => [
-                "exists:business_units,id,deleted_at,NULL",
+            "*.business_unit" => [
+                "required",
+                "exists:business_units,name,deleted_at,NULL",
             ],
         ];
     }

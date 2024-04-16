@@ -54,7 +54,7 @@ class GlobalFunction
                 "message" => $message,
                 "result" => $result,
             ],
-            Status::DENIED_STATUS
+            Message::DENIED_STATUS
         );
     }
 }

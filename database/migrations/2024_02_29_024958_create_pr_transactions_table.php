@@ -89,6 +89,7 @@ return new class extends Migration {
             $table->string("module_name");
             $table->string("layer");
             $table->string("status")->nullable();
+            $table->string("transaction_number")->nullable();
             $table->string("description")->nullable();
             $table->string("reason")->nullable();
             $table->string("asset")->nullable();

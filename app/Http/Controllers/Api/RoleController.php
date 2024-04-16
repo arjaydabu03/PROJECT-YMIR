@@ -19,7 +19,6 @@ class RoleController extends Controller
         $role = Role::when($status === "inactive", function ($query) {
             $query->onlyTrashed();
         })
-
             ->useFilters()
             ->orderByDesc("updated_at")
             ->dynamicPaginate();
@@ -43,7 +42,7 @@ class RoleController extends Controller
             "access_permission" => $accessConvertedToString,
         ]);
 
-        RoleResource::collection($role);
+        new RoleResource($role);
 
         return GlobalFunction::save(Message::ROLE_SAVE, $role);
     }
@@ -57,12 +56,6 @@ class RoleController extends Controller
             return GlobalFunction::invalid(Message::INVALID_ACTION);
         }
         $access_permission = $request->access_permission;
-
-        // $uniqueAccessPermission = array_unique($access_permission);
-
-        // if ($uniqueAccessPermission) {
-        //     return GlobalFunction::invalid(Message::INVALID_ACTION);
-        // }
 
         $access_permission = implode(",", $access_permission);
 

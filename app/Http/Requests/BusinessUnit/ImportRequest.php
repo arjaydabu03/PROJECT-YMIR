@@ -35,7 +35,7 @@ class ImportRequest extends FormRequest
             "*.code" => "code",
             "*.company_id" => "company",
         ];
-    }
+    } 
 
     public function message()
     {

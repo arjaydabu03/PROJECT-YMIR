@@ -13,6 +13,7 @@ use App\Http\Requests\DisplayRequest;
 use App\Http\Resources\DepartmentResource;
 use App\Http\Requests\Department\StoreRequest;
 use App\Http\Resources\DepartmentSaveResource;
+use App\Http\Requests\Department\ImportRequest;
 
 class DepartmentController extends Controller
 {

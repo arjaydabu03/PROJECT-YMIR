@@ -15,6 +15,7 @@ use App\Functions\GlobalFunction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PRViewRequest;
 use App\Http\Resources\PRTransactionResource;
+use App\Http\Requests\PurchaseRequest\AssetRequest;
 use App\Http\Requests\PurchaseRequest\StoreRequest;
 
 class PRTransactionController extends Controller
@@ -126,6 +127,106 @@ class PRTransactionController extends Controller
                 "approver_name" => $index["approver_name"],
                 "layer" => $index["layer"],
             ]);
+        }
+
+        $pr_collect = new PRTransactionResource($purchase_request);
+
+        return GlobalFunction::save(
+            Message::PURCHASE_REQUEST_SAVE,
+            $pr_collect
+        );
+    }
+
+    public function asset_sync(AssetRequest $request)
+    {
+        $asset = $request->all();
+
+        $user_id = Auth()->user()->id;
+
+        $pr_number = PRTransaction::latest()
+            ->get()
+            ->first();
+        $increment = $pr_number ? $pr_number->id + 1 : 1;
+
+        foreach ($asset as $sync) {
+            $purchase_request = new PRTransaction([
+                "pr_number" => "1",
+                "pr_description" => $sync["pr_description"],
+                "date_needed" => $sync["date_needed"],
+                "user_id" => $user_id,
+                "type_id" => $sync["type_id"],
+                "type_name" => $sync["type_name"],
+                "business_unit_id" => $sync["business_unit_id"],
+                "business_unit_name" => $sync["business_unit_name"],
+                "company_id" => $sync["company_id"],
+                "company_name" => $sync["company_name"],
+                "department_id" => $sync["department_id"],
+                "department_name" => $sync["department_name"],
+                "department_unit_id" => $sync["department_unit_id"],
+                "department_unit_name" => $sync["department_unit_name"],
+                "location_id" => $sync["location_id"],
+                "location_name" => $sync["location_name"],
+                "sub_unit_id" => $sync["sub_unit_id"],
+                "sub_unit_name" => $sync["sub_unit_name"],
+                "account_title_id" => $sync["account_title_id"],
+                "account_title_name" => $sync["account_title_name"],
+                "module_name" => "Assets",
+                "transaction_number" => $sync["transaction_number"],
+                "status" => "Pending",
+                "asset" => $sync["asset"],
+                "sgp" => $sync["sgp"],
+                "f1" => $sync["f1"],
+                "f2" => $sync["f2"],
+                "layer" => "1",
+                "description" => $sync["description"],
+            ]);
+            $purchase_request->save();
+
+            $orders = $sync["order"];
+
+            foreach ($orders as $index => $values) {
+                PRItems::create([
+                    "transaction_id" => $purchase_request->id,
+                    "item_code" => $values["item_code"],
+                    "item_name" => $values["item_name"],
+                    "uom_id" => "6",
+                    "quantity" => $values["quantity"],
+                    "remarks" => $values["remarks"],
+                ]);
+            }
+            $approver_settings = ApproverSettings::where(
+                "company_id",
+                $purchase_request->company_id
+            )
+                ->where("business_unit_id", $purchase_request->business_unit_id)
+                ->where("department_id", $purchase_request->department_id)
+                ->where(
+                    "department_unit_id",
+                    $purchase_request->department_unit_id
+                )
+                ->where("sub_unit_id", $purchase_request->sub_unit_id)
+                ->where("location_id", $purchase_request->location_id)
+                ->whereHas("set_approver")
+                ->get()
+                ->first();
+
+            $approvers = SetApprover::where(
+                "approver_settings_id",
+                $approver_settings->id
+            )->get();
+
+            if ($approvers->isEmpty()) {
+                return GlobalFunction::save(Message::NO_APPROVERS);
+            }
+
+            foreach ($approvers as $index) {
+                PrHistory::create([
+                    "pr_id" => $purchase_request->id,
+                    "approver_id" => $index["approver_id"],
+                    "approver_name" => $index["approver_name"],
+                    "layer" => $index["layer"],
+                ]);
+            }
         }
 
         $pr_collect = new PRTransactionResource($purchase_request);

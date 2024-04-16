@@ -181,7 +181,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
         PRTransactionController::class,
         "destroy",
     ]);
-
+    Route::post("asset_sync", [PRTransactionController::class, "asset_sync"]);
     Route::apiResource("pr_transaction", PRTransactionController::class);
 
     Route::apiResource("po_transaction", PoController::class);

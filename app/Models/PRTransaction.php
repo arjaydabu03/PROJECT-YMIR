@@ -40,6 +40,7 @@ class PRTransaction extends Model
         "supplier_id",
         "supplier_name",
         "module_name",
+        "transaction_number",
         "status",
         "layer",
         "description",

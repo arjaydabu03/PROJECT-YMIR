@@ -26,7 +26,7 @@ class LocationController extends Controller
             })
 
             ->useFilters()
-            ->orderByDesc("updated_at")
+            ->orderBy("id", "ASC")
             ->dynamicPaginate();
 
         $is_empty = $location->isEmpty();
@@ -107,20 +107,19 @@ class LocationController extends Controller
         $import = $request->all();
 
         foreach ($import as $index) {
-            $location = new Location([
+            $location = Location::create([
                 "name" => $index["name"],
                 "code" => $index["code"],
             ]);
-            $location->save();
 
             $sub_unit = $index["sub_unit"];
-
+            $location_id = $location->id;
             foreach ($sub_unit as $index) {
                 $sub_unit_name = $index["sub_unit_id"];
                 $sub_unit_id = SubUnit::where("name", $sub_unit_name)->first();
 
                 $location = LocationSubUnit::create([
-                    "location_id" => $location->id,
+                    "location_id" => $location_id,
                     "sub_unit_id" => $sub_unit_id->id,
                 ]);
             }

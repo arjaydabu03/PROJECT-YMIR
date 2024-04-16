@@ -24,11 +24,11 @@ class ImportRequest extends FormRequest
     public function rules()
     {
         return [
-            "*.code" => ["unique:locations,code", "distinct"],
+            "*.code" => ["required", "unique:locations,code", "distinct"],
             "*.sub_unit.*.sub_unit_id" => [
                 "exists:sub_units,name,deleted_at,NULL",
             ],
-        ]; 
+        ];
     }
 
     public function attributes()

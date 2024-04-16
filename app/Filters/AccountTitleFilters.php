@@ -11,7 +11,5 @@ class AccountTitleFilters extends QueryFilters
     protected array $columnSearch = ["name", "code"];
 
 
-    public function status($status){
-        
-    }
+   
 }
