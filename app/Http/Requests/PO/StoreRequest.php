@@ -24,8 +24,44 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
-            "*approver_id" => ["required", "distinct", "string"],
+            "company_id" => [
+                "required",
+                $this->route()->po_approver
+                    ? "unique:po_settings,company_id," .
+                        $this->route()->po_approver
+                    : "unique:po_settings,company_id",
+            ],
+            "*approver_id" => ["required", "distinct"],
             "*layer" => ["distinct"],
         ];
     }
+
+    // public function withValidator($validator)
+    // {
+    //     $validator->after(function ($validator) {
+    //         // $validator->errors()->add("custom", $this->user()->id);
+    //         $validator->errors()->add("custom", $this->route()->po_approver);
+    //         // $validator->errors()->add("custom", "STOP!");
+
+    //         // $approvers = ApproverSettings::where(
+    //         //     "business_unit_id",
+    //         //     $this->input("*.business_unit_id")
+    //         // )
+    //         //     ->where("company_id", $this->input("*.company_id"))
+    //         //     ->where("department_id", $this->input("*.department_id"))
+    //         //     ->where(
+    //         //         "department_unit_id",
+    //         //         $this->input("*.department_unit_id")
+    //         //     )
+    //         //     ->where("sub_unit_id", $this->input("*.sub_unit_id"))
+    //         //     ->where("location_id", $this->input("*.location_id"))
+    //         //     ->get()
+    //         //     ->first();
+    //         // if (!$approvers) {
+    //         //     $validator->errors()->add("message", "No approvers yet.");
+    //         // }
+
+    //         return $validator;
+    //     });
+    // }
 }

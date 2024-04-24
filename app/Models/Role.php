@@ -16,7 +16,6 @@ class Role extends Model
 
     protected $fillable = ["name", "access_permission"];
 
-    protected $casts = ["access_permission" => "json"];
-
     protected $hidden = ["created_at"];
 }
+ 

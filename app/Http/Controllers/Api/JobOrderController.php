@@ -47,7 +47,7 @@ class JobOrderController extends Controller
     public function store(StoreRequest $request)
     {
         $job_order = new JobOrder([
-            "module" => $request["module"],
+            "module" => "Job Order",
             "company_id" => $request["company_id"],
             "business_unit_id" => $request["business_unit_id"],
             "department_id" => $request["department_id"],

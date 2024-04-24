@@ -27,7 +27,7 @@ class PRViewRequest extends FormRequest
             "status" => [
                 "required",
                 "string",
-                "in:pending,cancelled,voided,rejected,approved,cancel",
+                "in:pending,cancelled,voided,rejected,approved,cancel,pr_approved",
             ],
         ];
     }

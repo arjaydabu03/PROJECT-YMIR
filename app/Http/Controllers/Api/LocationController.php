@@ -114,6 +114,7 @@ class LocationController extends Controller
 
             $sub_unit = $index["sub_unit"];
             $location_id = $location->id;
+
             foreach ($sub_unit as $index) {
                 $sub_unit_name = $index["sub_unit_id"];
                 $sub_unit_id = SubUnit::where("name", $sub_unit_name)->first();

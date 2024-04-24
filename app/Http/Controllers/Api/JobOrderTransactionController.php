@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\User;
 use App\Models\JobItems;
+use App\Models\JobOrder;
 use App\Response\Message;
 use App\Models\JobHistory;
 use App\Models\SetApprover;
 use Illuminate\Http\Request;
 use App\Models\ApproverSettings;
 use App\Functions\GlobalFunction;
+use App\Models\JobOrderApprovers;
 use App\Models\JobOrderTransaction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PRViewRequest;
@@ -86,6 +88,7 @@ class JobOrderTransactionController extends Controller
             "account_title_id" => $request->account_title_id,
             "account_title_name" => $request->account_title_name,
             "module_name" => "Job Order",
+            "status" => "Pending",
             "layer" => "1",
             "description" => $request->description,
         ]);
@@ -102,10 +105,9 @@ class JobOrderTransactionController extends Controller
                 "remarks" => $request["order"][$index]["remarks"],
             ]);
         }
-        $approver_settings = ApproverSettings::where(
-            "company_id",
-            $job_order_request->company_id
-        )
+        $approver_settings = JobOrder::where("module", "Job Order")
+            ->where("company_id", $job_order_request->company_id)
+
             ->where("business_unit_id", $job_order_request->business_unit_id)
             ->where("department_id", $job_order_request->department_id)
             ->where(
@@ -118,8 +120,8 @@ class JobOrderTransactionController extends Controller
             ->get()
             ->first();
 
-        $approvers = SetApprover::where(
-            "approver_settings_id",
+        $approvers = JobOrderApprovers::where(
+            "job_order_id",
             $approver_settings->id
         )->get();
 
@@ -149,7 +151,7 @@ class JobOrderTransactionController extends Controller
         if (!$not_found) {
             return GlobalFunction::not_found(Message::NOT_FOUND);
         }
-        return $user_id = Auth()->user()->id;
+        $user_id = Auth()->user()->id;
 
         $orders = $request->order;
 

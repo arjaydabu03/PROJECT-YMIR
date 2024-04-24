@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Response\Message;
+use App\Models\POSettings;
 use App\Models\PoApprovers;
 use Illuminate\Http\Request;
 use App\Functions\GlobalFunction;
@@ -15,11 +16,10 @@ class PoApproversController extends Controller
     public function index(DisplayRequest $request)
     {
         $status = $request->status;
-        $job_order = PoApprovers::when($status === "inactive", function (
-            $query
-        ) {
-            $query->onlyTrashed();
-        })
+        $job_order = POSettings::with("set_approver")
+            ->when($status === "inactive", function ($query) {
+                $query->onlyTrashed();
+            })
 
             ->useFilters()
             ->latest("updated_at")
@@ -38,45 +38,73 @@ class PoApproversController extends Controller
     }
     public function store(StoreRequest $request)
     {
-        $group = $request->all();
+        $approver = new POSettings([
+            "module" => "PO APPROVERS",
+            "company_id" => $request["company_id"],
+            "company_name" => $request["company_name"],
+        ]);
 
-        $count = count($group);
+        $approver->save();
 
-        if ($count == 0) {
-            return GlobalFunction::invalid(Message::INVALID_ACTION);
+        $set_approver = $request["settings_approver"];
+
+        foreach ($set_approver as $key => $value) {
+            PoApprovers::create([
+                "po_settings_id" => $approver->id,
+                "approver_id" => $set_approver[$key]["approver_id"],
+                "approver_name" => $set_approver[$key]["approver_name"],
+                "from_price" => $set_approver[$key]["from_price"],
+                "to_price" => $set_approver[$key]["to_price"],
+                "layer" => $set_approver[$key]["layer"],
+            ]);
         }
 
-        $newTaggedApproval = collect($group)
-            ->pluck("approver_id")
-            ->toArray();
+        return GlobalFunction::save(Message::APPROVERS_SAVE, $approver);
+    }
 
-        $approver_id = PoApprovers::whereIn("approver_id", $newTaggedApproval)
+    public function update(StoreRequest $request, $id)
+    {
+        $setting = POSettings::with("set_approver")->find($id);
+
+        $set_approver = $request["settings_approver"];
+
+        // TAG SETTINGS
+        $newTaggedApproval = collect($set_approver)
+            ->pluck("id")
+            ->toArray();
+        $currentTaggedApproval = PoApprovers::where("po_settings_id", $id)
             ->get()
             ->pluck("id")
             ->toArray();
 
-        $currentTaggedApproval = PoApprovers::get()
-            ->pluck("id")
-            ->toArray();
-
         foreach ($currentTaggedApproval as $set_approver_id) {
-            if (!in_array($set_approver_id, $approver_id)) {
-                PoApprovers::where("id", $set_approver_id)->delete();
+            if (!in_array($set_approver_id, $newTaggedApproval)) {
+                PoApprovers::where("id", $set_approver_id)->forceDelete();
             }
         }
 
-        foreach ($group as $index => $value) {
+        foreach ($set_approver as $index => $value) {
             PoApprovers::updateOrCreate(
                 [
+                    "id" => $value["id"] ?? null,
+                    "po_settings_id" => $id,
                     "approver_id" => $value["approver_id"],
                     "approver_name" => $value["approver_name"],
+                    "from_price" => $value["from_price"],
+                    "to_price" => $value["to_price"],
                 ],
                 ["layer" => $value["layer"]]
             );
         }
-        return GlobalFunction::save(
-            Message::APPROVERS_SAVE,
-            $request->toArray()
+
+        $setting->update([
+            "company_id" => $request["company_id"],
+            "company_name" => $request["company_name"],
+        ]);
+
+        return GlobalFunction::responseFunction(
+            Message::APPROVERS_UPDATE,
+            $setting
         );
     }
 }

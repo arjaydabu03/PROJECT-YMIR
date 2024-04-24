@@ -181,6 +181,7 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
         PRTransactionController::class,
         "destroy",
     ]);
+    Route::get("assets", [PRTransactionController::class, "assets"]);
     Route::post("asset_sync", [PRTransactionController::class, "asset_sync"]);
     Route::apiResource("pr_transaction", PRTransactionController::class);
 
@@ -197,6 +198,21 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     Route::patch("cancelled/{id}", [PrApproverController::class, "cancelled"]);
     Route::patch("void/{id}", [PrApproverController::class, "voided"]);
     Route::patch("rejected/{id}", [PrApproverController::class, "rejected"]);
+
+    Route::patch("approved_jo/{id}", [
+        PrApproverController::class,
+        "approved_jo",
+    ]);
+    Route::patch("cancelled_jo/{id}", [
+        PrApproverController::class,
+        "cancelled_jo",
+    ]);
+    Route::patch("void_jo/{id}", [PrApproverController::class, "void_jo"]);
+    Route::patch("rejected_jo/{id}", [
+        PrApproverController::class,
+        "rejected_jo",
+    ]);
+
     Route::get("job_approver", [PrApproverController::class, "job_order"]);
     Route::apiResource("approver_dashboard", PrApproverController::class);
 

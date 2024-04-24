@@ -122,6 +122,7 @@ class UserController extends Controller
         $is_active = User::withTrashed()
             ->where("id", $id)
             ->first();
+
         if (!$is_active) {
             return $is_active;
         } elseif (!$is_active->deleted_at) {

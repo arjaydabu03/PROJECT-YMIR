@@ -43,6 +43,29 @@ class PRTransactionController extends Controller
             $purchase_request
         );
     }
+    public function assets(PRViewRequest $request)
+    {
+        $status = $request->status;
+        $user_id = Auth()->user()->id;
+
+        $purchase_request = PRTransaction::with("approver_history")
+            ->where("module_name", "Assets")
+            ->orderByDesc("updated_at")
+            ->useFilters()
+            ->dynamicPaginate();
+
+        $is_empty = $purchase_request->isEmpty();
+
+        if ($is_empty) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+        PRTransactionResource::collection($purchase_request);
+
+        return GlobalFunction::responseFunction(
+            Message::PURCHASE_REQUEST_DISPLAY,
+            $purchase_request
+        );
+    }
 
     public function store(StoreRequest $request)
     {
@@ -146,11 +169,11 @@ class PRTransactionController extends Controller
         $pr_number = PRTransaction::latest()
             ->get()
             ->first();
-        $increment = $pr_number ? $pr_number->id + 1 : 1;
 
         foreach ($asset as $sync) {
+            $increment = $pr_number ? $pr_number->id + 1 : 1;
             $purchase_request = new PRTransaction([
-                "pr_number" => "1",
+                "pr_number" => $increment,
                 "pr_description" => $sync["pr_description"],
                 "date_needed" => $sync["date_needed"],
                 "user_id" => $user_id,
@@ -178,7 +201,6 @@ class PRTransactionController extends Controller
                 "f1" => $sync["f1"],
                 "f2" => $sync["f2"],
                 "layer" => "1",
-                "description" => $sync["description"],
             ]);
             $purchase_request->save();
 
@@ -216,7 +238,7 @@ class PRTransactionController extends Controller
             )->get();
 
             if ($approvers->isEmpty()) {
-                return GlobalFunction::save(Message::NO_APPROVERS);
+                return GlobalFunction::invalid(Message::NO_APPROVERS);
             }
 
             foreach ($approvers as $index) {
@@ -229,12 +251,9 @@ class PRTransactionController extends Controller
             }
         }
 
-        $pr_collect = new PRTransactionResource($purchase_request);
+        // $pr_collect = new PRTransactionResource($purchase_request);
 
-        return GlobalFunction::save(
-            Message::PURCHASE_REQUEST_SAVE,
-            $pr_collect
-        );
+        return GlobalFunction::save(Message::PURCHASE_REQUEST_SAVE, $asset);
     }
 
     public function update(StoreRequest $request, $id)

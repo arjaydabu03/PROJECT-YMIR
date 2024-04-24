@@ -70,6 +70,15 @@ class PRTransactionFilters extends QueryFilters
                     ->whereHas("approver_history", function ($query) {
                         $query->whereNotNull("approved_at");
                     });
+            })
+            ->when($status === "pr_approved", function ($query) use ($user_id) {
+                $query
+                    ->where("status", "Approved")
+                    ->whereNull("cancelled_at")
+                    ->whereNull("voided_at")
+                    ->whereHas("approver_history", function ($query) {
+                        $query->whereNotNull("approved_at");
+                    });
             });
     }
 }
