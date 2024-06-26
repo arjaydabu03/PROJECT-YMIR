@@ -35,6 +35,12 @@ class Message
     const PURCHASE_REQUEST_SAVE = "Purchase request successfully save.";
     const APPROVERS_SAVE = "Approvers successfully save.";
     const PURCHASE_ORDER_SAVE = "Purchase order successfully save.";
+    const JOB_ORDER_SAVE = "Job order successfully save.";
+    const CATEGORIES_SAVE = "Category successfully save.";
+    const UPLOAD_SUCCESSFUL = "Upload successfully save";
+    const NO_FILE_UPLOAD = "PR successfully created. No file uploaded";
+    const ASSET_SAVE = "Asset save successfully.";
+    const RR_SAVE = "Received Receipt successfully save";
 
     // DISPLAY DATA
     const USER_DISPLAY = "User display successfully.";
@@ -61,6 +67,10 @@ class Message
     const PURCHASE_REQUEST_DISPLAY = "Purchase request  display successfully.";
     const APPROVERS_DISPLAY = "Approvers display successfully.";
     const PURCHASE_ORDER_DISPLAY = "Purchase order  display successfully.";
+    const CATEGORIES_DISPLAY = "Category display successfully.";
+    const FILE_DISPLAY = "File display successfully.";
+    const ASSET_DISPLAY = "Assets display succeccfully.";
+    const RR_DISPLAY = "Received Receipt display successfully.";
 
     //UPDATE
     const USER_UPDATE = "User successfully updated.";
@@ -87,6 +97,10 @@ class Message
     const PURCHASE_REQUEST_UPDATE = "Purchase request successfully updated.";
     const APPROVERS_UPDATE = "Approvers successfully updated.";
     const PURCHASE_ORDER_UPDATE = "Purchase order successfully updated.";
+    const CATEGORIES_UPDATE = "Category successfully updated.";
+    const ASSET_UPDATE = "Asset successfully update.";
+    const RESUBMITTED = "Purchase request successfully resubmitted.";
+    const BUYER_TAGGED = "Buyer tagged successfully.";
 
     //SOFT DELETE
     const ARCHIVE_STATUS = "Successfully archived.";
@@ -99,6 +113,7 @@ class Message
 
     // DISPLAY ERRORS
     const NOT_FOUND = "Data not found.";
+    const FILE_NOT_FOUND = "File not found.";
     //VALIDATION
     const SINGLE_VALIDATION = "Data has been validated.";
     const INVALID_ACTION = "Invalid action.";
@@ -110,6 +125,7 @@ class Message
     const IN_USE_DEPARTMENT_UNIT = "This department unit is in used.";
     const IN_USE_SUB_UNIT = "This sub unit is in used.";
     const IN_USE_BUSINESS_UNIT = "This business unit is in used.";
+    const QUANTITY_VALIDATION = "The received item cannot be more than the quantity.";
 
     const NO_APPROVERS = "No approvers yet.";
 

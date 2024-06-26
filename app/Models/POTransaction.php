@@ -38,7 +38,10 @@ class POTransaction extends Model
         "sub_unit_name",
         "account_title_id",
         "account_title_name",
+        "supplier_id",
+        "supplier_name",
         "module_name",
+        "total_item_price",
         "status",
         "layer",
         "description",
@@ -51,6 +54,7 @@ class POTransaction extends Model
         "rejected_at",
         "voided_at",
         "cancelled_at",
+        "updated_by",
         "approver_id",
     ];
 
@@ -64,8 +68,28 @@ class POTransaction extends Model
         return $this->hasMany(POItems::class, "po_id", "id");
     }
 
+    public function pr_items()
+    {
+        return $this->hasMany(PRItems::class, "buyer_id", "id");
+    }
+
     public function approver_history()
     {
         return $this->hasMany(PoHistory::class, "po_id", "id");
+    }
+
+    public function supplier()
+    {
+        return $this->hasMany(Suppliers::class, "supplier_id", "id");
+    }
+
+    public function rr_transaction()
+    {
+        return $this->hasMany(RRTransaction::class, "po_id", "id");
+    }
+
+    public function rr_orders()
+    {
+        return $this->belongsTo(RROrders::class, "po_id", "id");
     }
 }

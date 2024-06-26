@@ -35,7 +35,7 @@ class PoApproversController extends Controller
             Message::APPROVERS_DISPLAY,
             $job_order
         );
-    }
+    } 
     public function store(StoreRequest $request)
     {
         $approver = new POSettings([
@@ -53,8 +53,8 @@ class PoApproversController extends Controller
                 "po_settings_id" => $approver->id,
                 "approver_id" => $set_approver[$key]["approver_id"],
                 "approver_name" => $set_approver[$key]["approver_name"],
-                "from_price" => $set_approver[$key]["from_price"],
-                "to_price" => $set_approver[$key]["to_price"],
+                "price_range" => $set_approver[$key]["price_range"],
+                // "to_price" => $set_approver[$key]["to_price"],
                 "layer" => $set_approver[$key]["layer"],
             ]);
         }
@@ -68,7 +68,6 @@ class PoApproversController extends Controller
 
         $set_approver = $request["settings_approver"];
 
-        // TAG SETTINGS
         $newTaggedApproval = collect($set_approver)
             ->pluck("id")
             ->toArray();
@@ -90,8 +89,8 @@ class PoApproversController extends Controller
                     "po_settings_id" => $id,
                     "approver_id" => $value["approver_id"],
                     "approver_name" => $value["approver_name"],
-                    "from_price" => $value["from_price"],
-                    "to_price" => $value["to_price"],
+                    "price_range" => $value["price_range"],
+                    // "to_price" => $value["to_price"],
                 ],
                 ["layer" => $value["layer"]]
             );

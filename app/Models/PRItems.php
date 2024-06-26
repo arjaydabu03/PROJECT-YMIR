@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\POItems;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,8 +18,13 @@ class PRItems extends Model
         "item_code",
         "item_name",
         "uom_id",
+        "po_at",
+        "buyer_id",
+        "buyer_name",
         "quantity",
         "remarks",
+        "attachment",
+        "assets",
     ];
     protected $hidden = ["created_at"];
 
@@ -35,5 +41,15 @@ class PRItems extends Model
     public function uom()
     {
         return $this->belongsTo(Uom::class, "uom_id", "id");
+    }
+
+    public function asset()
+    {
+        return $this->belongsTo(Assets::class, "assets", "id");
+    }
+
+    public function po_order()
+    {
+        return $this->hasMany(POItems::class, "po_id", "id");
     }
 }

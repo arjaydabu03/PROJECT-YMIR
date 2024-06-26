@@ -40,10 +40,13 @@ return new class extends Migration {
                 ->foreign("supplier_id")
                 ->references("id")
                 ->on("suppliers");
+            $table->string("attachment")->nullable;
             $table->string("buyer_id")->nullable();
-
+            $table->string("buyer_name")->nullable();
+            $table->dobule("price");
             $table->double("quantity");
             $table->double("quantity_serve")->nullable();
+            $table->dobule("total_price");
             $table->string("remarks")->nullable();
             $table->timestamps();
             $table->softDeletes();

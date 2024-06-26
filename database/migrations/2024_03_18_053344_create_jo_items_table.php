@@ -25,11 +25,13 @@ return new class extends Migration {
                 ->foreign("uom_id")
                 ->references("id")
                 ->on("uoms");
-
+            $table->timestamp("po_at")->nullable();
+            $table->string("purchase_order_id")->nullable();
             $table->double("quantity");
             $table->double("unit_price");
             $table->double("total_price");
             $table->string("remarks")->nullable();
+            $table->string("attachment")->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

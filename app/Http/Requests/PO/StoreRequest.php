@@ -24,6 +24,7 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
+            // "supplier_id" => "required|exists:suppliers,id",
             "company_id" => [
                 "required",
                 $this->route()->po_approver

@@ -24,7 +24,7 @@ class SubUnit extends Model
             "location_sub_units",
             "sub_unit_id",
             "location_id"
-        )->withTrashed();
+        )->withTimeStamps();
     }
 
     public function department_unit()

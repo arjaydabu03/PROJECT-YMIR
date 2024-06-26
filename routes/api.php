@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\PAController;
 use App\Http\Controllers\Api\PoController;
 use App\Http\Controllers\Api\UomController;
 use App\Http\Controllers\Api\ItemController;
@@ -8,6 +9,8 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\TypeController;
 use App\Http\Controllers\Api\UnitController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\BuyerController;
+use App\Http\Controllers\API\AssetsController;
 use App\Http\Controllers\Api\CanvasController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\ExpenseController;
@@ -18,6 +21,7 @@ use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\FinancialController;
 use App\Http\Controllers\Api\WarehouseController;
+use App\Http\Controllers\Api\CategoriesController;
 use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\PrApproverController;
 use App\Http\Controllers\Api\AccountTypeController;
@@ -26,8 +30,10 @@ use App\Http\Controllers\Api\AccountGroupController;
 use App\Http\Controllers\Api\AccountTitleController;
 use App\Http\Controllers\Api\NormalBalanceController;
 use App\Http\Controllers\Api\PRTransactionController;
+use App\Http\Controllers\Api\RRTransactionController;
 use App\Http\Controllers\Api\DepartmentUnitController;
 use App\Http\Controllers\Api\AccountSubGroupController;
+use App\Http\Controllers\Api\JORRTransactionController;
 use App\Http\Controllers\Api\AccountTitleUnitController;
 use App\Http\Controllers\Api\ApproverSettingsController;
 use App\Http\Controllers\Api\JobOrderTransactionController;
@@ -181,10 +187,39 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
         PRTransactionController::class,
         "destroy",
     ]);
+    Route::get("download-file/{filename}", [
+        PRTransactionController::class,
+        "download",
+    ]);
+    Route::post("store_multiple/{id}", [
+        PRTransactionController::class,
+        "store_multiple",
+    ]);
+    Route::post("store_file", [PRTransactionController::class, "store_file"]);
     Route::get("assets", [PRTransactionController::class, "assets"]);
     Route::post("asset_sync", [PRTransactionController::class, "asset_sync"]);
+    Route::patch("pr_transaction/resubmit/{id}", [
+        PRTransactionController::class,
+        "resubmit",
+    ]);
+    Route::patch("po_transaction/buyer/{id}", [
+        PRTransactionController::class,
+        "buyer",
+    ]);
     Route::apiResource("pr_transaction", PRTransactionController::class);
-
+    Route::patch("po_transaction/resubmit/{id}", [
+        PoController::class,
+        "resubmit",
+    ]);
+    Route::get("approved_pr", [PoController::class, "approved_pr"]);
+    Route::post("po_transaction/job_order_po", [
+        PoController::class,
+        "store_jo",
+    ]);
+    Route::put("po_transaction/job_order_po/resubmit/{id}", [
+        PoController::class,
+        "resubmit_jo",
+    ]);
     Route::apiResource("po_transaction", PoController::class);
 
     Route::patch("approvers_settings/archived/{id}", [
@@ -214,6 +249,12 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
     ]);
 
     Route::get("job_approver", [PrApproverController::class, "job_order"]);
+    Route::get("expense_approver", [PrApproverController::class, "expense"]);
+    Route::get("assets_approver", [
+        PrApproverController::class,
+        "assets_approver",
+    ]);
+
     Route::apiResource("approver_dashboard", PrApproverController::class);
 
     Route::patch("job_order/archived/{id}", [
@@ -236,17 +277,120 @@ Route::group(["middleware" => ["auth:sanctum"]], function () {
         ExpenseController::class,
         "destroy",
     ]);
-
+    Route::patch("expense/resubmit/{id}", [
+        ExpenseController::class,
+        "resubmit",
+    ]);
     Route::apiResource("expense", ExpenseController::class);
 
+    Route::patch("jo_order_transaction/resubmit/{id}", [
+        JobOrderTransactionController::class,
+        "resubmit",
+    ]);
     Route::apiResource(
         "job_order_transaction",
         JobOrderTransactionController::class
     );
 
+    Route::get("po_approver_dashboard/view/{id}", [
+        PoApproverDashboardController::class,
+        "view",
+    ]);
+
+    Route::get("po_approver_dashboard/view_jo_po", [
+        PoApproverDashboardController::class,
+        "approver_index_jo_po",
+    ]);
+
+    Route::get("po_approver_dashboard/view_jo_po/{id}", [
+        PoApproverDashboardController::class,
+        "approver_view_jo_po",
+    ]);
+
+    Route::patch("po_approver_dashboard/approve_po/{id}", [
+        PoApproverDashboardController::class,
+        "approved",
+    ]);
+    Route::patch("po_approver_dashboard/approve_jo_po/{id}", [
+        PoApproverDashboardController::class,
+        "approved_jo_po",
+    ]);
+    Route::patch("po_approver_dashboard/reject_po/{id}", [
+        PoApproverDashboardController::class,
+        "rejected",
+    ]);
+    Route::patch("po_approver_dashboard/rejected_jo_po/{id}", [
+        PoApproverDashboardController::class,
+        "rejected_jo_po",
+    ]);
+    Route::patch("po_approver_dashboard/cancel_po/{id}", [
+        PoApproverDashboardController::class,
+        "cancel",
+    ]);
     Route::apiResource(
         "po_approver_dashboard",
         PoApproverDashboardController::class
+    );
+    Route::patch("categories/archived/{id}", [
+        CategoriesController::class,
+        "destroy",
+    ]);
+
+    Route::post("categories/import", [CategoriesController::class, "import"]);
+
+    Route::apiResource("categories", CategoriesController::class);
+
+    Route::post("asset/import", [AssetsController::class, "import"]);
+    Route::patch("asset/archived/{id}", [AssetsController::class, "destroy"]);
+    Route::apiResource("asset", AssetsController::class);
+
+    Route::get("purchase_assistant/view/{id}", [PAController::class, "view"]);
+    Route::get("purchase_assistant/view_po/{id}", [
+        PAController::class,
+        "viewpo",
+    ]);
+    Route::get("purchase_assistant/view_jo", [PAController::class, "index_jo"]);
+    Route::get("purchase_assistant/view_jo/{id}", [
+        PAController::class,
+        "view_jo",
+    ]);
+    Route::get("purchase_assistant/view_jo_po", [
+        PAController::class,
+        "index_jo_po",
+    ]);
+    Route::apiResource("purchase_assistant", PAController::class);
+    Route::get("buyer/view/{id}", [BuyerController::class, "view"]);
+    Route::get("buyer/view_to_po/{id}", [BuyerController::class, "viewto_po"]);
+    Route::get("buyer/view_po/{id}", [PoController::class, "view"]);
+    Route::apiResource("buyer", BuyerController::class);
+
+    Route::get("approved_po/po_to_rr_display", [
+        RRTransactionController::class,
+        "index_po_approved",
+    ]);
+    Route::get("asset_report_sync", [
+        RRTransactionController::class,
+        "asset_rr_sync",
+    ]);
+    Route::get("approved_po/po_to_rr_display/{id}", [
+        RRTransactionController::class,
+        "view_po_approved",
+    ]);
+    Route::apiResource("rr_transaction", RRTransactionController::class);
+
+    Route::get("approved_pos_for_job_order_report_display", [
+        JORRTransactionController::class,
+        "view_approve_jo_po",
+    ]);
+
+    Route::get("approved_pos_for_job_order_report_display/{id}", [
+        JORRTransactionController::class,
+        "view_single_approve_jo_po",
+    ]);
+
+    Route::apiResource(
+        "job_order_report_transaction",
+        JORRTransactionController::class
     );
 });
 Route::post("login", [UserController::class, "login"]);

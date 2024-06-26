@@ -43,6 +43,169 @@ class PrApproverController extends Controller
         }
 
         $purchase_request = PRTransaction::with("order", "approver_history")
+            ->where("module_name", "Inventoriables")
+            ->when($status == "pending", function ($query) use (
+                $pr_id,
+                $layer
+            ) {
+                $query
+                    ->whereIn("id", $pr_id)
+                    ->whereIn("layer", $layer)
+                    ->where(function ($query) {
+                        $query
+                            ->where("status", "Pending")
+                            ->orWhere("status", "For Approval");
+                    })
+                    ->whereNull("voided_at")
+                    ->whereNull("cancelled_at")
+                    ->whereNull("rejected_at");
+            })
+            ->when($status == "rejected", function ($query) use (
+                $pr_id,
+                $layer
+            ) {
+                $query
+                    ->whereIn("id", $pr_id)
+                    ->whereIn("layer", $layer)
+                    ->whereNull("voided_at")
+                    ->whereNotNull("rejected_at");
+            })
+            ->when($status == "approved", function ($query) use (
+                $pr_id,
+                $layer,
+                $user_id
+            ) {
+                $query
+                    ->whereIn("id", $pr_id)
+                    ->whereNull("cancelled_at")
+                    ->whereNull("voided_at")
+                    ->whereHas("approver_history", function ($query) use (
+                        $user_id
+                    ) {
+                        $query
+                            ->whereIn("approver_id", $user_id)
+                            ->whereNotNull("approved_at");
+                    });
+            })
+            ->get();
+
+        if ($purchase_request->isEmpty()) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+        $purchase_collect = PRTransactionResource::collection(
+            $purchase_request
+        );
+
+        return GlobalFunction::responseFunction(
+            Message::PURCHASE_REQUEST_DISPLAY,
+            $purchase_collect
+        );
+    }
+
+    public function expense(Request $request)
+    {
+        $user = Auth()->user()->id;
+
+        $status = $request->status;
+
+        $user_id = User::where("id", $user)
+            ->get()
+            ->first();
+
+        $pr_id = PrHistory::where("approver_id", $user)
+            ->get()
+            ->pluck("pr_id");
+        $layer = PrHistory::where("approver_id", $user)
+            ->get()
+            ->pluck("layer");
+
+        if (empty($pr_id) || empty($layer)) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+
+        $purchase_request = PRTransaction::with("order", "approver_history")
+            ->where("module_name", "Expense")
+            ->when($status == "pending", function ($query) use (
+                $pr_id,
+                $layer
+            ) {
+                $query
+
+                    ->whereIn("id", $pr_id)
+                    ->whereIn("layer", $layer)
+                    ->where(function ($query) {
+                        $query
+                            ->where("status", "Pending")
+                            ->orWhere("status", "For Approval");
+                    })
+                    ->whereNull("voided_at")
+                    ->whereNull("cancelled_at")
+                    ->whereNull("rejected_at");
+            })
+            ->when($status == "rejected", function ($query) use (
+                $pr_id,
+                $layer
+            ) {
+                $query
+                    ->whereIn("id", $pr_id)
+                    ->whereIn("layer", $layer)
+                    ->whereNull("voided_at")
+                    ->whereNotNull("rejected_at");
+            })
+
+            ->when($status == "approved", function ($query) use (
+                $pr_id,
+                $layer,
+                $user_id
+            ) {
+                $query
+                    ->whereIn("id", $pr_id)
+                    ->whereNull("cancelled_at")
+                    ->whereNull("voided_at")
+                    ->whereHas("approver_history", function ($query) use (
+                        $user_id
+                    ) {
+                        $query
+                            ->whereIn("approver_id", $user_id)
+                            ->whereNotNull("approved_at");
+                    });
+            })
+            ->get();
+
+        if ($purchase_request->isEmpty()) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+        PRTransactionResource::collection($purchase_request);
+
+        return GlobalFunction::responseFunction(
+            Message::PURCHASE_REQUEST_DISPLAY,
+            $purchase_request
+        );
+    }
+
+    public function assets_approver(Request $request)
+    {
+        $user = Auth()->user()->id;
+
+        $status = $request->status;
+
+        $user_id = User::where("id", $user)
+            ->get()
+            ->first();
+
+        $pr_id = PrHistory::where("approver_id", $user)
+            ->get()
+            ->pluck("pr_id");
+        $layer = PrHistory::where("approver_id", $user)
+            ->get()
+            ->pluck("layer");
+
+        if (empty($pr_id) || empty($layer)) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+
+        $purchase_request = PRTransaction::with("order", "approver_history")
+            ->where("module_name", "Assets")
             ->when($status == "pending", function ($query) use (
                 $pr_id,
                 $layer
@@ -184,6 +347,7 @@ class PrApproverController extends Controller
             $jo_approvers
         );
     }
+
     public function approved(Request $request, $id)
     {
         $date_today = Carbon::now()
@@ -227,7 +391,7 @@ class PrApproverController extends Controller
         }
         $pr_transaction->update([
             "layer" => $pr_transaction->layer + 1,
-            "status" => "For approval",
+            "status" => "For Approval",
         ]);
 
         $pr_collect = new PRTransactionResource($pr_transaction);
@@ -243,7 +407,12 @@ class PrApproverController extends Controller
 
         $pr_transaction = PRTransaction::find($id);
 
+        if ($pr_transaction->status == "For Approval") {
+            return GlobalFunction::invalid(Message::INVALID_ACTION);
+        }
+
         $pr_transaction->update([
+            "rejected_at" => null,
             "cancelled_at" => $date_today,
             "status" => "Cancelled",
         ]);
@@ -357,6 +526,7 @@ class PrApproverController extends Controller
         $pr_transaction = JobOrderTransaction::find($id);
 
         $pr_transaction->update([
+            "reason" => $request->reason,
             "cancelled_at" => $date_today,
             "status" => "Cancelled",
         ]);

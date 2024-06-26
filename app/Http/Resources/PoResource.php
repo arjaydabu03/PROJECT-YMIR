@@ -64,6 +64,10 @@ class PoResource extends JsonResource
                 "id" => $this->account_title_id,
                 "name" => $this->account_title_name,
             ],
+            "supplier_id" => [
+                "id" => $this->supplier_id,
+                "name" => $this->supplier_name,
+            ],
             "asset" => $this->asset,
             "sgp" => $this->sgp,
             "f1" => $this->f1,
@@ -73,6 +77,7 @@ class PoResource extends JsonResource
             "rejected_at" => $this->rejected_at,
             "voided_at" => $this->voided_at,
             "cancelled_at" => $this->cancelled_at,
+            "status" => $this->status,
             "description" => $this->description,
             "reason" => $this->reason,
             "created_at" => $this->created_at,
@@ -80,6 +85,7 @@ class PoResource extends JsonResource
             "approver_history" => ApporverHistoryResource::collection(
                 $this->approver_history
             ),
+            "rr_transaction" => RRResource::collection($this->rr_transaction),
         ];
     }
 }

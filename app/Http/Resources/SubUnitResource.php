@@ -20,13 +20,6 @@ class SubUnitResource extends JsonResource
             "code" => $this->code,
             "updated_at" => $this->updated_at,
             "deleted_at" => $this->deleted_at,
-            "locations" => [
-                "id" => $this->location->id,
-                "name" => $this->location->name,
-                "code" => $this->location->code,
-                "updated_at" => $this->location->updated_at,
-                "deleted_at" => $this->location->deleted_at,
-            ],
         ];
     }
 }

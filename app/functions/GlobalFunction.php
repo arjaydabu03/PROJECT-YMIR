@@ -57,4 +57,35 @@ class GlobalFunction
             Message::DENIED_STATUS
         );
     }
+
+    public static function stored($message, $result = [])
+    {
+        return response()->json(
+            [
+                "message" => $message,
+                "result" => $result,
+            ],
+            Message::CREATED_STATUS
+        );
+    }
+
+    public static function uploadfailed($message, $result = [])
+    {
+        return response()->json(
+            [
+                "message" => $message,
+                "filename" => $result,
+            ],
+        );
+    }
+
+    public static function displayfile($message, $result = []){
+        return response()->json(
+            [
+                "message" => $message,
+                "result" => $result
+            ],
+            Message::SUCESS_STATUS
+        );
+    }
 }

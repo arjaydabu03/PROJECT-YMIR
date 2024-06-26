@@ -8,5 +8,13 @@ class JobOrderFilters extends QueryFilters
 {
     protected array $allowedFilters = [];
 
-    protected array $columnSearch = [];
+    protected array $columnSearch = [
+        "module",
+        "company_id",
+        "business_unit_id",
+        "department_id",
+        "department_unit_id",
+        "sub_unit_id",
+        "location_id",
+    ];
 }

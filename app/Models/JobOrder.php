@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Assets;
 use App\Filters\JobOrderFilters;
 use Essa\APIToolKit\Filters\Filterable;
 use Illuminate\Database\Eloquent\Model;
@@ -58,4 +59,5 @@ class JobOrder extends Model
     {
         return $this->hasMany(JobOrderApprovers::class, "job_order_id", "id");
     }
+
 }

@@ -80,12 +80,8 @@ return new class extends Migration {
                 ->on("account_titles");
             $table->string("account_title_name");
 
-            $table->unsignedInteger("supplier_id")->index();
-            $table
-                ->foreign("supplier_id")
-                ->references("id")
-                ->on("suppliers");
-            $table->string("supplier_name");
+            $table->string("supplier_id")->nullable();
+            $table->string("supplier_name")->nullable();
             $table->string("module_name");
             $table->string("layer");
             $table->string("status")->nullable();
@@ -96,6 +92,8 @@ return new class extends Migration {
             $table->string("sgp")->nullable();
             $table->string("f1")->nullable();
             $table->string("f2")->nullable();
+            $table->string("for_po_only")->nullable();
+            $table->string("for_po_only_id")->nullable();
             $table->timestamp("approved_at")->nullable();
             $table->timestamp("rejected_at")->nullable();
             $table->timestamp("voided_at")->nullable();

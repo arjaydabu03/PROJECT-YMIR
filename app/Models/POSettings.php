@@ -18,7 +18,7 @@ class POSettings extends Model
 
     protected $fillable = ["module", "company_id", "company_name"];
 
-    public function set_approver()
+    public function set_approver() 
     {
         return $this->hasMany(PoApprovers::class, "po_settings_id", "id");
     }

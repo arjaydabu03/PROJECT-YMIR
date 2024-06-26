@@ -13,8 +13,7 @@ class PoApprovers extends Model
         "po_settings_id",
         "approver_id",
         "approver_name",
-        "from_price",
-        "to_price",
+        "price_range",
         "layer",
     ];
 }

@@ -2,22 +2,29 @@
 
 namespace App\Http\Controllers\Api;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\PoHistory;
 use App\Response\Message;
+use App\Models\JoPoHistory;
 use Illuminate\Http\Request;
 use App\Models\POTransaction;
+use App\Models\JOPOTransaction;
+use App\Http\Requests\JODisplay;
 use App\Functions\GlobalFunction;
+use App\Models\ApproverDashboard;
+use App\Http\Requests\POADRequest;
 use App\Http\Resources\PoResource;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\JoPoResource;
+use App\Models\ApproverDashboardJOPO;
+use App\Http\Requests\Approver\RejectRequest;
 
 class PoApproverDashboardController extends Controller
 {
-    public function index(Request $request)
+    public function index(POADRequest $request)
     {
         $user = Auth()->user()->id;
-
-        $status = $request->status;
 
         $user_id = User::where("id", $user)
             ->get()
@@ -34,56 +41,55 @@ class PoApproverDashboardController extends Controller
             return GlobalFunction::notFound(Message::NOT_FOUND);
         }
 
-        $purchase_request = POTransaction::with("order", "approver_history")
-            ->when($status == "pending", function ($query) use (
-                $po_id,
-                $layer
-            ) {
-                $query
-
-                    ->whereIn("id", $po_id)
-                    ->whereIn("layer", $layer)
-                    ->where("status", "Pending")
-                    ->whereNull("voided_at")
-                    ->whereNull("cancelled_at")
-                    ->whereNull("rejected_at");
-            })
-            ->when($status == "rejected", function ($query) use (
-                $po_id,
-                $layer
-            ) {
-                $query
-                    ->whereIn("id", $po_id)
-                    ->whereIn("layer", $layer)
-                    ->whereNull("voided_at")
-                    ->whereNotNull("rejected_at");
-            })
-
-            ->when($status == "approved", function ($query) use (
-                $po_id, 
-                $layer,
-                $user_id
-            ) {
-                $query
-                    ->whereIn("id", $po_id)
-                    ->whereHas("approver_history", function ($query) use (
-                        $user_id
-                    ) {
-                        $query
-                            ->whereIn("approver_id", $user_id)
-                            ->whereNotNull("approved_at");
-                    });
-            })
-            ->get();
+        $purchase_request = ApproverDashboard::with("order", "approver_history")
+            ->orderByDesc("updated_at")
+            ->useFilters()
+            ->dynamicPaginate();
 
         if ($purchase_request->isEmpty()) {
             return GlobalFunction::notFound(Message::NOT_FOUND);
         }
-        $purchase_collect = PoResource::collection($purchase_request);
+        new PoResource($purchase_request);
 
         return GlobalFunction::responseFunction(
-            Message::PURCHASE_REQUEST_DISPLAY,
-            $purchase_collect
+            Message::PURCHASE_ORDER_DISPLAY,
+            $purchase_request
+        );
+    }
+
+    public function view(Request $request, $id)
+    {
+        $user = Auth()->user()->id;
+
+        $user_id = User::where("id", $user)
+            ->get()
+            ->first();
+
+        $po_id = PoHistory::where("approver_id", $user)
+            ->get()
+            ->pluck("po_id");
+        $layer = PoHistory::where("approver_id", $user)
+            ->get()
+            ->pluck("layer");
+
+        if (empty($po_id) || empty($layer)) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+
+        $purchase_request = ApproverDashboard::with("order", "approver_history")
+            ->where("id", $id)
+            ->get()
+            ->first();
+
+        if (!$purchase_request) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+
+        new PoResource($purchase_request);
+
+        return GlobalFunction::responseFunction(
+            Message::PURCHASE_ORDER_DISPLAY,
+            $purchase_request
         );
     }
 
@@ -120,7 +126,7 @@ class PoApproverDashboardController extends Controller
         if ($count == $po_transaction->layer) {
             $po_transaction->update([
                 "approved_at" => $date_today,
-                "status" => "Approved",
+                "status" => "For Receiving",
             ]);
             $po_collect = new PoResource($po_transaction);
             return GlobalFunction::responseFunction(
@@ -130,7 +136,7 @@ class PoApproverDashboardController extends Controller
         }
         $po_transaction->update([
             "layer" => $po_transaction->layer + 1,
-            "status" => "For approval",
+            "status" => "For Approval",
         ]);
 
         $po_collect = new PoResource($po_transaction);
@@ -154,7 +160,9 @@ class PoApproverDashboardController extends Controller
         }
 
         $po_transaction->update([
+            "rejected_at" => null,
             "cancelled_at" => $date_today,
+            "status" => "Cancelled",
         ]);
         $po_collect = new PoResource($po_transaction);
 
@@ -188,6 +196,10 @@ class PoApproverDashboardController extends Controller
 
         $po_transaction = POTransaction::find($id);
 
+        if (!$po_transaction) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+
         $po_transaction->update([
             "status" => "Reject",
             "reason" => $request["reason"],
@@ -204,5 +216,167 @@ class PoApproverDashboardController extends Controller
 
         $po_collect = new PoResource($po_transaction);
         return GlobalFunction::responseFunction(Message::REJECTED, $po_collect);
+    }
+
+    public function approved_jo_po(Request $request, $id)
+    {
+        $date_today = Carbon::now()
+            ->timeZone("Asia/Manila")
+            ->format("Y-m-d H:i");
+
+        $user = Auth()->user()->id;
+
+        $user_id = User::where("id", $user)
+            ->get()
+            ->first();
+
+        $set_approver = JoPoHistory::where("jo_po_id", $id)->get();
+
+        if (empty($set_approver)) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+
+        $approved_history = JoPoHistory::where("jo_po_id", $id)
+            ->where("approver_id", $user)
+            ->get()
+            ->first()
+            ->update([
+                "approved_at" => $date_today,
+            ]);
+
+        $count = count($set_approver);
+
+        $jo_po_transaction = JOPOTransaction::find($id);
+
+        if ($count == $jo_po_transaction->layer) {
+            $jo_po_transaction->update([
+                "approved_at" => $date_today,
+                "status" => "For Receiving",
+            ]);
+            $po_collect = new JoPoResource($jo_po_transaction);
+            return GlobalFunction::responseFunction(
+                Message::APPORVED,
+                $po_collect
+            );
+        }
+        $jo_po_transaction->update([
+            "layer" => $jo_po_transaction->layer + 1,
+            "status" => "For Approval",
+        ]);
+
+        $jo_po_collect = new JoPoResource($jo_po_transaction);
+        return GlobalFunction::responseFunction(
+            Message::APPORVED,
+            $jo_po_collect
+        );
+    }
+
+    public function rejected_jo_po(RejectRequest $request, $id)
+    {
+        $user = Auth()->user()->id;
+        $date_today = Carbon::now()
+            ->timeZone("Asia/Manila")
+            ->format("Y-m-d H:i");
+
+        $po_transaction = JOPOTransaction::find($id);
+
+        if (!$po_transaction) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+
+        $po_transaction->update([
+            "status" => "Reject",
+            "reason" => $request["reason"],
+            "rejected_at" => $date_today,
+        ]);
+
+        $to_reject = JoPoHistory::where("jo_po_id", $po_transaction->id)
+            ->where("approver_id", $user)
+            ->get()
+            ->first()
+            ->update([
+                "rejected_at" => $date_today,
+            ]);
+
+        $po_collect = new JoPoResource($po_transaction);
+        return GlobalFunction::responseFunction(Message::REJECTED, $po_collect);
+    }
+
+    public function approver_index_jo_po(JODisplay $request)
+    {
+        $user = Auth()->user()->id;
+
+        $user_id = User::where("id", $user)
+            ->get()
+            ->first();
+
+        $jo_po_id = JoPoHistory::where("approver_id", $user_id->id)
+            ->get()
+            ->pluck("jo_po_id");
+        $layer = JoPoHistory::where("approver_id", $user_id)
+            ->get()
+            ->pluck("layer");
+
+        if (empty($jo_po_id) || empty($layer)) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+
+        $purchase_request = ApproverDashboardJOPO::with(
+            "jo_po_orders",
+            "jo_approver_history"
+        )
+            ->orderByDesc("updated_at")
+            ->useFilters()
+            ->dynamicPaginate();
+
+        if ($purchase_request->isEmpty()) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+
+        new JoPoResource($purchase_request);
+
+        return GlobalFunction::responseFunction(
+            Message::PURCHASE_ORDER_DISPLAY,
+            $purchase_request
+        );
+    }
+
+    public function approver_view_jo_po(Request $request, $id)
+    {
+        $user = Auth()->user()->id;
+
+        $user_id = User::where("id", $user)
+            ->get()
+            ->first();
+
+        $jo_po_id = JoPoHistory::where("approver_id", $user_id->id)
+            ->get()
+            ->pluck("jo_po_id");
+        $layer = JoPoHistory::where("approver_id", $user_id)
+            ->get()
+            ->pluck("layer");
+
+        if (empty($jo_po_id) || empty($layer)) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+
+        $purchase_request = JOPOTransaction::with(
+            "jo_po_orders",
+            "jo_approver_history"
+        )
+            ->where("id", $id)
+            ->get()
+            ->first();
+
+        if (!$purchase_request) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+
+        new JoPoResource($purchase_request);
+
+        return GlobalFunction::responseFunction(
+            Message::PURCHASE_ORDER_DISPLAY,
+            $purchase_request
+        );
     }
 }

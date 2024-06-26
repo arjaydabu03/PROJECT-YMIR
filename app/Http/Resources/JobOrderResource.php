@@ -21,7 +21,6 @@ class JobOrderResource extends JsonResource
             "jo_number" => $this->jo_number,
             "jo_description" => $this->jo_description,
             "date_needed" => $this->date_needed,
-            "po_number" => $this->po_number,
 
             "user" => [
                 "prefix_id" => $this->users->prefix_id,
@@ -63,7 +62,10 @@ class JobOrderResource extends JsonResource
                 "id" => $this->account_title_id,
                 "name" => $this->account_title_name,
             ],
+            "total_price" => $this->total_price,
+            "assets" => $this->assets,
             "module_name" => $this->module_name,
+            "status" => $this->status,
             "approved_at" => $this->approved_at,
             "rejected_at" => $this->rejected_at,
             "voided_at" => $this->voided_at,
@@ -71,12 +73,19 @@ class JobOrderResource extends JsonResource
             "description" => $this->description,
             "reason" => $this->reason,
             "created_at" => $this->created_at,
-            "order" => JobOrderItemsResource::collection(
-                $this->order
-            ),
+            "for_po_only" => $this->for_po_only,
+            "for_po_only_id" => $this->for_po_only_id,
+            "order_jo_transaction_id" => $this->id,
+            "order" => JobOrderItemsResource::collection($this->order),
             "approver_history" => JobOrderHistoryResource::collection(
                 $this->approver_history
             ),
+            // "jo_po_transaction" => JoPoResource::collection(
+            //     $this->jo_po_transaction
+            // ),
+            // "jo_approver_history" => JobOrderHistoryResource::collection(
+            //     $this->jo_approver_history
+            // ),
         ];
     }
 }

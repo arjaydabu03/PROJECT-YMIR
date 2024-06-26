@@ -18,7 +18,6 @@ return new class extends Migration {
             $table->integer("po_number");
             $table->string("po_description");
             $table->timestamp("date_needed");
-
             $table->unsignedInteger("user_id")->index();
             $table
                 ->foreign("user_id")
@@ -80,8 +79,14 @@ return new class extends Migration {
                 ->references("id")
                 ->on("account_titles");
             $table->string("account_title_name");
-
+            $table->unsignedInteger("supplier_id")->index();
+            $table
+                ->foreign("supplier_id")
+                ->references("id")
+                ->on("suppliers");
+            $table->string("supplier_name");
             $table->string("module_name");
+            $table->string("total_item_price")->nullable();
             $table->string("layer");
             $table->string("status")->nullable();
             $table->string("description")->nullable();
@@ -94,6 +99,7 @@ return new class extends Migration {
             $table->timestamp("rejected_at")->nullable();
             $table->timestamp("voided_at")->nullable();
             $table->timestamp("cancelled_at")->nullable();
+            $table->string("updated_by")->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

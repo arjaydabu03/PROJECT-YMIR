@@ -21,6 +21,13 @@ return new class extends Migration {
                 ->foreign("uom_id")
                 ->references("id")
                 ->on("uoms");
+
+            $table->unsignedInteger("category_id")->index();
+            $table
+                ->foreign("category_id")
+                ->references("id")
+                ->on("categories");
+            $table->string("type");
             $table->timestamps();
             $table->softDeletes();
         });

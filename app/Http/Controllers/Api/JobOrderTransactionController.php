@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\JobItems;
 use App\Models\JobOrder;
@@ -24,18 +25,20 @@ class JobOrderTransactionController extends Controller
     {
         $user_id = Auth()->user()->id;
         $status = $request->status;
-        $job_order_request = JobOrderTransaction::with("approver_history")
-
+        $job_order_request = JobOrderTransaction::with(
+            "order",
+            "approver_history",
+            "jo_po_transaction",
+            "jo_po_transaction.jo_approver_history"
+        )
             ->orderByDesc("updated_at")
             ->useFilters()
             ->dynamicPaginate();
 
-        $is_empty = $job_order_request->isEmpty();
-
-        if ($is_empty) {
+        if ($job_order_request->isEmpty()) {
             return GlobalFunction::notFound(Message::NOT_FOUND);
         }
-        JobOrderResource::collection($job_order_request);
+        new JobOrderResource($job_order_request);
 
         return GlobalFunction::responseFunction(
             Message::PURCHASE_REQUEST_DISPLAY,
@@ -46,6 +49,16 @@ class JobOrderTransactionController extends Controller
     public function store(StoreRequest $request)
     {
         $user_id = Auth()->user()->id;
+
+        if ($request->has("for_po_only")) {
+            $for_po_id = $user_id;
+            $date_today = Carbon::now()
+                ->timeZone("Asia/Manila")
+                ->format("Y-m-d H:i");
+        } else {
+            $for_po_id = null;
+            $date_today = null;
+        }
 
         $orders = $request->order;
 
@@ -73,25 +86,29 @@ class JobOrderTransactionController extends Controller
             "user_id" => $user_id,
             "type_id" => $request["type_id"],
             "type_name" => $request["type_name"],
-            "business_unit_id" => $user_details->business_unit->id,
-            "business_unit_name" => $user_details->business_unit->name,
-            "company_id" => $user_details->company->id,
-            "company_name" => $user_details->company->name,
-            "department_id" => $user_details->department->id,
-            "department_name" => $user_details->department->name,
-            "department_unit_id" => $user_details->department_unit->id,
-            "department_unit_name" => $user_details->department_unit->name,
-            "location_id" => $user_details->location->id,
-            "location_name" => $user_details->location->name,
-            "sub_unit_id" => $user_details->sub_unit->id,
-            "sub_unit_name" => $user_details->sub_unit->name,
-            "account_title_id" => $request->account_title_id,
-            "account_title_name" => $request->account_title_name,
+            "business_unit_id" => $request["business_unit_id"],
+            "business_unit_name" => $request["business_unit_name"],
+            "company_id" => $request["company_id"],
+            "company_name" => $request["company_name"],
+            "department_id" => $request["department_id"],
+            "department_name" => $request["department_name"],
+            "department_unit_id" => $request["department_unit_id"],
+            "department_unit_name" => $request["department_unit_name"],
+            "location_id" => $request["location_id"],
+            "location_name" => $request["location_name"],
+            "sub_unit_id" => $request["sub_unit_id"],
+            "sub_unit_name" => $request["sub_unit_name"],
+            "account_title_id" => $request["account_title_id"],
+            "account_title_name" => $request["account_title_name"],
+            "asset" => $request["asset"],
             "module_name" => "Job Order",
             "status" => "Pending",
             "layer" => "1",
-            "description" => $request->description,
+            "description" => $request["description"],
+            "for_po_only" => $date_today,
+            "for_po_only_id" => $for_po_id,
         ]);
+
         $job_order_request->save();
 
         foreach ($orders as $index => $values) {
@@ -103,6 +120,8 @@ class JobOrderTransactionController extends Controller
                 "unit_price" => $values["unit_price"],
                 "total_price" => $values["unit_price"] * $values["quantity"],
                 "remarks" => $request["order"][$index]["remarks"],
+                "attachment" => $request["order"][$index]["attachment"],
+                "assets" => $request["order"][$index]["asset"],
             ]);
         }
         $approver_settings = JobOrder::where("module", "Job Order")
@@ -174,22 +193,23 @@ class JobOrderTransactionController extends Controller
             "user_id" => $user_id,
             "type_id" => $request["type_id"],
             "type_name" => $request["type_name"],
-            "business_unit_id" => $user_details->business_unit->id,
-            "business_unit_name" => $user_details->business_unit->name,
-            "company_id" => $user_details->company->id,
-            "company_name" => $user_details->company->name,
-            "department_id" => $user_details->department->id,
-            "department_name" => $user_details->department->name,
-            "department_unit_id" => $user_details->department_unit->id,
-            "department_unit_name" => $user_details->department_unit->name,
-            "location_id" => $user_details->location->id,
-            "location_name" => $user_details->location->name,
-            "sub_unit_id" => $user_details->sub_unit->id,
-            "sub_unit_name" => $user_details->sub_unit->name,
-            "account_title_id" => $request->account_title_id,
-            "account_title_name" => $request->account_title_name,
+            "business_unit_id" => $request["business_unit_id"],
+            "business_unit_name" => $request["business_unit_name"],
+            "company_id" => $request["company_id"],
+            "company_name" => $request["company_name"],
+            "department_id" => $request["department_id"],
+            "department_name" => $request["department_name"],
+            "department_unit_id" => $request["department_unit_id"],
+            "department_unit_name" => $request["department_unit_name"],
+            "location_id" => $request["location_id"],
+            "location_name" => $request["location_name"],
+            "sub_unit_id" => $request["sub_unit_id"],
+            "sub_unit_name" => $request["sub_unit_name"],
+            "account_title_id" => $request["account_title_id"],
+            "account_title_name" => $request["account_title_name"],
+            "asset" => $request["asset"],
             "module_name" => "Job Order",
-            "description" => $request->description,
+            "description" => $request["description"],
         ]);
 
         $newOrders = collect($orders)
@@ -220,6 +240,8 @@ class JobOrderTransactionController extends Controller
                     "total_price" =>
                         $values["unit_price"] * $values["quantity"],
                     "remarks" => $values["remarks"],
+                    "attachment" => $values["attachment"],
+                    "asset" => $values["asset"],
                 ]
             );
         }
@@ -231,6 +253,115 @@ class JobOrderTransactionController extends Controller
             $pr_collect
         );
     }
+
+    public function resubmit(Request $request, $id)
+    {
+        $job_order_request = JobOrderTransaction::find($id);
+        $user_id = Auth()->user()->id;
+
+        $not_found = JobOrderTransaction::where("id", $id)->exists();
+
+        if (!$not_found) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+
+        $jo_history = JobHistory::where("jo_id", $id)->get();
+
+        if ($jo_history->isEmpty()) {
+            return GlobalFunction::notFound(Message::NOT_FOUND);
+        }
+
+        foreach ($jo_history as $jo) {
+            $jo->update([
+                "approved_at" => null,
+                "rejected_at" => null,
+            ]);
+        }
+
+        $orders = $request->order;
+
+        $user_details = User::with(
+            "company",
+            "business_unit",
+            "department",
+            "department_unit",
+            "sub_unit",
+            "location"
+        )
+            ->where("id", $user_id)
+            ->get()
+            ->first();
+
+        $job_order_request->update([
+            "jo_number" => $job_order_request->id,
+            "jo_description" => $request["jo_description"],
+            "date_needed" => $request["date_needed"],
+            "user_id" => $user_id,
+            "type_id" => $request["type_id"],
+            "type_name" => $request["type_name"],
+            "business_unit_id" => $request["business_unit_id"],
+            "business_unit_name" => $request["business_unit_name"],
+            "company_id" => $request["company_id"],
+            "company_name" => $request["company_name"],
+            "department_id" => $request["department_id"],
+            "department_name" => $request["department_name"],
+            "department_unit_id" => $request["department_unit_id"],
+            "department_unit_name" => $request["department_unit_name"],
+            "location_id" => $request["location_id"],
+            "location_name" => $request["location_name"],
+            "sub_unit_id" => $request["sub_unit_id"],
+            "sub_unit_name" => $request["sub_unit_name"],
+            "account_title_id" => $request["account_title_id"],
+            "account_title_name" => $request["account_title_name"],
+            "asset" => $request["asset"],
+            "module_name" => "Job Order",
+            "description" => $request["description"],
+            "status" => "Pending",
+            "approved_at" => null,
+            "rejected_at" => null,
+            "voided_at" => null,
+            "cancelled_at" => null,
+        ]);
+
+        $newOrders = collect($orders)
+            ->pluck("id")
+            ->toArray();
+        $currentOrders = JobItems::where("jo_transaction_id", $id)
+            ->get()
+            ->pluck("id")
+            ->toArray();
+
+        foreach ($currentOrders as $order_id) {
+            if (!in_array($order_id, $newOrders)) {
+                JobItems::where("id", $order_id)->forceDelete();
+            }
+        }
+
+        foreach ($orders as $index => $values) {
+            JobItems::withTrashed()->updateOrCreate(
+                [
+                    "id" => $values["id"] ?? null,
+                ],
+                [
+                    "jo_transaction_id" => $job_order_request->id,
+                    "description" => $values["description"],
+                    "uom_id" => $values["uom_id"],
+                    "quantity" => $values["quantity"],
+                    "unit_price" => $values["unit_price"],
+                    "total_price" =>
+                        $values["unit_price"] * $values["quantity"],
+                    "remarks" => $values["remarks"],
+                    "attachment" => $values["attachment"],
+                    "asset" => $values["asset"],
+                ]
+            );
+        }
+
+        $jo_collect = new JobOrderResource($job_order_request);
+
+        return GlobalFunction::save(Message::RESUBMITTED, $jo_collect);
+    }
+
     public function destroy($id)
     {
         $job_order_request = JobOrderTransaction::where("id", $id)

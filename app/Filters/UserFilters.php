@@ -33,4 +33,13 @@ class UserFilters extends QueryFilters
             });
         });
     }
+
+    public function buyer($buyer)
+    {
+        $this->builder->when($buyer == "active", function ($query) {
+            $query->whereHas("role", function ($query) {
+                $query->where("name", "Buyer");
+            });
+        });
+    }
 }

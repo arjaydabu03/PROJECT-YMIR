@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Http\Resources\PRItemsResource;
 use App\Http\Resources\ApporverHistoryResource;
+use App\Http\Resources\AssetsResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class PRTransactionResource extends JsonResource
@@ -21,7 +22,6 @@ class PRTransactionResource extends JsonResource
             "pr_number" => $this->pr_number,
             "pr_description" => $this->pr_description,
             "date_needed" => $this->date_needed,
-            "po_number" => $this->po_number,
 
             "user" => [
                 "prefix_id" => $this->users->prefix_id,
@@ -64,11 +64,11 @@ class PRTransactionResource extends JsonResource
                 "id" => $this->account_title_id,
                 "name" => $this->account_title_name,
             ],
-            "asset" => $this->asset,
             "sgp" => $this->sgp,
             "f1" => $this->f1,
             "f2" => $this->f2,
             "module_name" => $this->module_name,
+            "status" => $this->status,
             "approved_at" => $this->approved_at,
             "rejected_at" => $this->rejected_at,
             "voided_at" => $this->voided_at,
@@ -76,10 +76,12 @@ class PRTransactionResource extends JsonResource
             "description" => $this->description,
             "reason" => $this->reason,
             "created_at" => $this->created_at,
+            "order_transaction_id" => $this->id,
             "order" => PRItemsResource::collection($this->order),
             "approver_history" => ApporverHistoryResource::collection(
                 $this->approver_history
             ),
+            "po_transaction" => PoResource::collection($this->po_transaction),
         ];
     }
 }

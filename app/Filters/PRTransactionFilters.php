@@ -48,7 +48,10 @@ class PRTransactionFilters extends QueryFilters
 
         $this->builder
             ->when($status === "pending", function ($query) use ($user_id) {
-                $query->where("user_id", $user_id)->where("status", "Pending");
+                $query
+                    ->where("user_id", $user_id)
+                    ->where("status", "Pending")
+                    ->orWhere("status", "For Approval");
             })
             ->when($status === "cancel", function ($query) use ($user_id) {
                 $query
@@ -67,6 +70,7 @@ class PRTransactionFilters extends QueryFilters
                     ->where("user_id", $user_id)
                     ->whereNull("cancelled_at")
                     ->whereNull("voided_at")
+                    ->whereNotNull("approved_at")
                     ->whereHas("approver_history", function ($query) {
                         $query->whereNotNull("approved_at");
                     });

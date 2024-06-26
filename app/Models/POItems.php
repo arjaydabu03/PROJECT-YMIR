@@ -19,9 +19,13 @@ class POItems extends Model
         "item_name",
         "supplier_id",
         "uom_id",
+        "price",
         "quantity",
         "quantity_serve",
+        "total_price",
+        "attachment",
         "buyer_id",
+        "buyer_name",
         "remarks",
     ];
 }

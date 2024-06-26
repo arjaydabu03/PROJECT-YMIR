@@ -26,6 +26,7 @@ class ImportRequest extends FormRequest
         return [
             "*.code" => ["unique:items,code", "distinct"],
             "*.uom_id" => ["exists:uoms,name,deleted_at,NULL"],
+            "*.category_id" => ["exists:categories,name,deleted_at,NULL"],
         ];
     }
 
@@ -34,6 +35,7 @@ class ImportRequest extends FormRequest
         return [
             "*.code" => "code",
             "*.uom_id" => "uom",
+            "*.category_id" => "category",
         ];
     }
 

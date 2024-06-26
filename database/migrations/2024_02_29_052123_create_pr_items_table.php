@@ -19,19 +19,23 @@ return new class extends Migration {
                 ->foreign("transaction_id")
                 ->references("id")
                 ->on("pr_transactions");
-
-            $table->string("item_id");
-            $table->string("item_code");
-            $table->string("item_name");
+            $table->string("item_id")->nullable();
+            $table->string("item_code")->nullable();
+            $table->string("item_name")->nullable();
 
             $table->unsignedInteger("uom_id")->index();
             $table
                 ->foreign("uom_id")
                 ->references("id")
                 ->on("uoms");
-
             $table->double("quantity");
             $table->string("remarks")->nullable();
+            $table->string("attachment")->nullable();
+            $table->string("buyer_id")->nullalble();
+            $table->string("buyer_name")->nullable();
+            $table->timestamp("po_at")->nullable();
+            $table->string("purchase_order_id")->nullable();
+            $table->string("type")->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

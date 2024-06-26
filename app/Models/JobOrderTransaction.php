@@ -15,6 +15,7 @@ class JobOrderTransaction extends Model
     protected string $default_filters = JobOrderTransactionFilters::class;
 
     protected $table = "jo_transactions";
+
     protected $fillable = [
         "jo_number",
         "jo_description",
@@ -36,7 +37,9 @@ class JobOrderTransaction extends Model
         "sub_unit_name",
         "account_title_id",
         "account_title_name",
+        "asset",
         "module_name",
+        "total_price",
         "status",
         "layer",
         "description",
@@ -46,6 +49,8 @@ class JobOrderTransaction extends Model
         "voided_at",
         "cancelled_at",
         "approver_id",
+        "for_po_only",
+        "for_po_only_id",
     ];
 
     public function users()
@@ -58,8 +63,23 @@ class JobOrderTransaction extends Model
         return $this->hasMany(JobItems::class, "jo_transaction_id", "id");
     }
 
+    public function jo_po_transaction()
+    {
+        return $this->hasMany(JOPOTransaction::class, "jo_number", "jo_number");
+    }
+
     public function approver_history()
     {
         return $this->hasMany(JobHistory::class, "jo_id", "id");
+    }
+
+    public function jo_approver_history()
+    {
+        return $this->hasMany(JobHistory::class, "jo_id", "id");
+    }
+
+    public function assets()
+    {
+        return $this->belongsTo(Assets::class, "asset", "id");
     }
 }

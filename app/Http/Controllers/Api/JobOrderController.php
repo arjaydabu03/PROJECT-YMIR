@@ -71,6 +71,7 @@ class JobOrderController extends Controller
 
         return GlobalFunction::save(Message::APPROVERS_SAVE, $job_order);
     }
+
     public function update(StoreRequest $request, $id)
     {
         $setting = JobOrder::find($id);

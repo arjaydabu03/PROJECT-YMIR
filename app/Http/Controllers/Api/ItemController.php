@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\Uom;
 use App\Models\Items;
 use App\Response\Message;
+use App\Models\Categories;
 use Illuminate\Http\Request;
 use App\Functions\GlobalFunction;
 use App\Http\Controllers\Controller;
@@ -18,8 +19,8 @@ class ItemController extends Controller
     public function index(DisplayRequest $request)
     {
         $status = $request->status;
-
-        $item = Items::when($status === "inactive", function ($query) {
+        
+        $item = Items::with('types')->when($status === "inactive", function ($query) {
             $query->onlyTrashed();
         })
             ->useFilters()
@@ -41,6 +42,8 @@ class ItemController extends Controller
             "code" => $request->code,
             "name" => $request->name,
             "uom_id" => $request->uom_id,
+            "category_id" => $request->category_id,
+            "type" => $request->type
         ]);
 
         $item_collect = new ItemResource($item);
@@ -61,6 +64,8 @@ class ItemController extends Controller
             "code" => $request->code,
             "name" => $request->name,
             "uom_id" => $request->uom_id,
+            "category_id" => $request->category_id,
+            "type" => $request->type,
         ]);
 
         $item_collect = new ItemResource($item);
@@ -101,13 +106,16 @@ class ItemController extends Controller
 
         foreach ($import as $index) {
             $uom = $index["uom"];
+            $category = $index["category"];
 
             $uom_id = Uom::where("name", $uom)->first();
+            $category_id = Categories::where("name", $category)->first();
 
-            $department = DepartmentUnit::create([
+            $department = Items::create([
                 "name" => $index["name"],
                 "code" => $index["code"],
                 "uom_id" => $uom_id->id,
+                "category_id" => $category_id->id,
             ]);
         }
 

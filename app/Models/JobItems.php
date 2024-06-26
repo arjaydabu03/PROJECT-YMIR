@@ -19,6 +19,8 @@ class JobItems extends Model
         "unit_price",
         "total_price",
         "remarks",
+        "attachment",
+        "asset"
     ];
     protected $hidden = ["created_at"];
 
@@ -30,5 +32,10 @@ class JobItems extends Model
     public function uom()
     {
         return $this->belongsTo(Uom::class, "uom_id", "id");
+    }
+
+    public function asset()
+    {
+        return $this->belongsTo(Assets::class, 'asset', 'id');
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Assets;
+use App\Filters\ExpenseFilter;
 use App\Filters\PRTransactionFilters;
 use Essa\APIToolKit\Filters\Filterable;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +17,8 @@ class PRTransaction extends Model
     protected $table = "pr_transactions";
 
     protected string $default_filters = PRTransactionFilters::class;
+
+    // protected string $default_filters = ExpenseFilters::class;
 
     protected $fillable = [
         "pr_number",
@@ -49,6 +53,8 @@ class PRTransaction extends Model
         "sgp",
         "f1",
         "f2",
+        "for_po_only",
+        "for_po_only_id",
         "approved_at",
         "rejected_at",
         "voided_at",
@@ -70,5 +76,24 @@ class PRTransaction extends Model
     public function approver_history()
     {
         return $this->hasMany(PrHistory::class, "pr_id", "id");
+    }
+
+    public function po_transaction()
+    {
+        return $this->hasMany(
+            POTransaction::class,
+            "pr_number",
+            "pr_number"
+        )->withTrashed();
+    }
+
+    public function rr_transactions()
+    {
+        return $this->hasMany(RRTransaction::class, "pr_id", "id");
+    }
+
+    public function assets()
+    {
+        return $this->belongsTo(Assets::class, "asset", "id");
     }
 }

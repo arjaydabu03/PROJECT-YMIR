@@ -20,7 +20,6 @@ class SubUnitController extends Controller
     public function index(DisplayRequest $request)
     {
         $status = $request->status;
-
         $subunit = SubUnit::with("locations", "department_unit")
             ->when($status === "inactive", function ($query) {
                 $query->onlyTrashed();
